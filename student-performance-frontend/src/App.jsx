@@ -131,20 +131,27 @@ function App() {
 
         return (
           <>
-            <div id="prediction-form-section" className="dashboard-grid">
-              <div className="input-column">
+            <div id="prediction-form-section" className={`w-full ${history.length > 0 ? 'dashboard-grid' : 'flex flex-col items-center'}`}>
+              <div className={`${history.length > 0 ? 'input-column' : 'w-full max-w-2xl'} flex flex-col gap-6`}>
                 <PredictionForm onPredict={handlePredict} isLoading={loading} />
                 {!history.length && <ModelInfo />}
               </div>
-              <div className="results-column">
-                {error && (
-                  <div className="error-message">
-                    <p>{error}</p>
-                  </div>
-                )}
-                {history.length > 0 && <PredictionHistory history={history} />}
-              </div>
+              {history.length > 0 && (
+                <div className="results-column">
+                  {error && (
+                    <div className="error-message">
+                      <p>{error}</p>
+                    </div>
+                  )}
+                  <PredictionHistory history={history} />
+                </div>
+              )}
             </div>
+            {error && !history.length && (
+              <div className="error-message max-w-2xl mx-auto mt-4">
+                <p>{error}</p>
+              </div>
+            )}
             <Footer />
           </>
         );
