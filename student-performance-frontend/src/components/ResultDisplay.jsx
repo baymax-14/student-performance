@@ -39,118 +39,187 @@ const AnimatedValue = ({ value, prefix = "", postfix = "" }) => {
   return <span ref={ref} />;
 };
 
-const WeeklyChart = ({ data, width = 400, height = 200 }) => {
-  const [selectedIndex, setSelectedIndex] = useState(data.length - 1);
-  const padding = 40;
-  const bottomPadding = 40;
-  const chartWidth = width - padding * 2;
-  const chartHeight = height - padding - bottomPadding;
-  const barSpacing = chartWidth / data.length;
-  const baseline = height - bottomPadding;
-  const baselineOffset = 8;
+const WeeklyChart = ({ data, width = 550, height = 260 }) => {
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const padding = { top: 30, right: 30, bottom: 45, left: 45 };
+  const chartW = width - padding.left - padding.right;
+  const chartH = height - padding.top - padding.bottom;
   const maxValue = Math.max(...data.map((d) => d.value), 100);
-  const availableHeight = chartHeight - 40;
-  const getBarHeight = (value) => (value / maxValue) * availableHeight;
+  const minValue = Math.min(...data.map((d) => d.value), 0);
+  const range = maxValue - minValue || 1;
 
-  const barVariants = {
-    initial: { pathLength: 0, opacity: 0 },
-    animate: { pathLength: 1, opacity: 1 },
-  };
+  const getX = (i) => padding.left + (i / (data.length - 1)) * chartW;
+  const getY = (v) => padding.top + chartH - ((v - minValue) / range) * chartH;
+
+  // Build smooth bezier path
+  const points = data.map((d, i) => ({ x: getX(i), y: getY(d.value) }));
+  
+  let linePath = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const cp1x = points[i].x + (points[i + 1].x - points[i].x) * 0.4;
+    const cp1y = points[i].y;
+    const cp2x = points[i + 1].x - (points[i + 1].x - points[i].x) * 0.4;
+    const cp2y = points[i + 1].y;
+    linePath += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${points[i + 1].x} ${points[i + 1].y}`;
+  }
+
+  // Area fill path (line path + close down to baseline)
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${padding.top + chartH} L ${points[0].x} ${padding.top + chartH} Z`;
+
+  // Grid lines
+  const gridLines = 4;
+  const gridValues = Array.from({ length: gridLines + 1 }, (_, i) => 
+    Math.round(minValue + (range * i) / gridLines)
+  );
+
+  const activeIdx = hoveredIndex !== null ? hoveredIndex : data.length - 1;
 
   return (
-    <div className="relative p-4">
-      {data.map((point, index) => {
-        const x = padding + index * barSpacing + barSpacing / 2;
-        const isSelected = index === selectedIndex;
-        if (!isSelected) return null;
+    <div className="relative select-none">
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+        <defs>
+          <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#0ea5e9" />
+            <stop offset="100%" stopColor="#6366f1" />
+          </linearGradient>
+          <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.02" />
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-        const barHeight = getBarHeight(point.value);
-        const lineStartY = baseline - baselineOffset;
-        const lineEndY = lineStartY - barHeight;
-
-        const gradientTop = Math.max(padding, lineEndY - 40);
-        const gradientBottom = baseline + 60;
-        const gradientHeight = gradientBottom - gradientTop;
-
-        return (
-          <motion.div
-            key={`gradient-${index}`}
-            className="absolute"
-            style={{
-              left: `${x - 20 + 20}px`,
-              top: `${gradientTop}px`,
-              width: "40px",
-              height: `${gradientHeight}px`,
-              background: `linear-gradient(to top, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.1) 15%, rgba(255, 255, 255, 0.0))`,
-              borderRadius: "20px",
-              pointerEvents: "none",
-              zIndex: 1,
-              transformOrigin: "bottom",
-            }}
-            initial={{ opacity: 0, scaleY: 0 }}
-            animate={{ opacity: 1, scaleY: 1 }}
-            transition={{ duration: 0.3 }}
-          />
-        );
-      })}
-
-      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ position: "relative", zIndex: 2 }}>
-        {data.map((point, index) => {
-          const x = padding + index * barSpacing + barSpacing / 2;
-          const barHeight = getBarHeight(point.value);
-          const lineStartY = baseline - baselineOffset;
-          const lineEndY = lineStartY - barHeight;
-          const isSelected = index === selectedIndex;
-
+        {/* Grid lines */}
+        {gridValues.map((val, i) => {
+          const y = getY(val);
           return (
-            <g key={`${point.day}-${index}`}>
-              <rect
-                x={x - 25} y={0} width={50} height={height}
-                fill="transparent" style={{ cursor: "pointer" }}
-                onClick={() => setSelectedIndex(index)}
-              />
+            <g key={`grid-${i}`}>
               <motion.line
-                x1={x} y1={lineStartY} x2={x} y2={lineEndY}
-                stroke="var(--color-muted-foreground)" strokeWidth={2} strokeLinecap="round"
-                variants={barVariants} initial="initial" animate="animate"
-                transition={{ delay: index * 0.1, duration: 0.6 }} style={{ pointerEvents: "none" }}
+                x1={padding.left} y1={y} x2={padding.left + chartW} y2={y}
+                stroke="var(--color-muted)" strokeWidth={0.5} strokeDasharray="4 4" opacity={0.3}
+                initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+                transition={{ delay: 0.2 + i * 0.05, duration: 0.5 }}
+              />
+              <motion.text
+                x={padding.left - 10} y={y + 4} textAnchor="end" fontSize="10" fontWeight="500"
+                fill="var(--color-muted-foreground)" opacity={0.6}
+                initial={{ opacity: 0 }} animate={{ opacity: 0.6 }}
+                transition={{ delay: 0.3 + i * 0.05 }}
+              >
+                {val}%
+              </motion.text>
+            </g>
+          );
+        })}
+
+        {/* Animated area fill */}
+        <motion.path
+          d={areaPath}
+          fill="url(#areaGradient)"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+        />
+
+        {/* Animated line */}
+        <motion.path
+          d={linePath}
+          fill="none"
+          stroke="url(#lineGradient)"
+          strokeWidth={3}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          filter="url(#glow)"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        />
+
+        {/* Vertical hover line */}
+        {activeIdx !== null && (
+          <motion.line
+            x1={points[activeIdx].x} y1={padding.top}
+            x2={points[activeIdx].x} y2={padding.top + chartH}
+            stroke="var(--color-muted-foreground)" strokeWidth={1} strokeDasharray="3 3" opacity={0.3}
+            initial={{ opacity: 0 }} animate={{ opacity: 0.3 }}
+          />
+        )}
+
+        {/* Data points */}
+        {points.map((pt, i) => {
+          const isActive = i === activeIdx;
+          return (
+            <g key={`dot-${i}`}>
+              {/* Invisible hit area */}
+              <rect
+                x={pt.x - 25} y={padding.top} width={50} height={chartH}
+                fill="transparent" style={{ cursor: "pointer" }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
               />
 
-              {isSelected ? (
-                <>
-                  <motion.rect
-                    x={x - 25} y={lineEndY - 29} width={50} height={20} rx={10} ry={10} fill="var(--color-primary)"
-                    initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.1, duration: 0.3 }} style={{ pointerEvents: "none" }}
+              {/* Outer glow ring */}
+              {isActive && (
+                <motion.circle
+                  cx={pt.x} cy={pt.y} r={12}
+                  fill="rgba(14, 165, 233, 0.15)"
+                  initial={{ scale: 0 }} animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                />
+              )}
+
+              {/* Dot */}
+              <motion.circle
+                cx={pt.x} cy={pt.y}
+                r={isActive ? 6 : 4}
+                fill={isActive ? "#0ea5e9" : "var(--color-card)"}
+                stroke="url(#lineGradient)"
+                strokeWidth={2.5}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.4 + i * 0.1, type: "spring", stiffness: 400, damping: 15 }}
+                style={{ cursor: "pointer" }}
+              />
+
+              {/* Tooltip */}
+              {isActive && (
+                <motion.g
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <rect
+                    x={pt.x - 24} y={pt.y - 32} width={48} height={22} rx={8}
+                    fill="var(--color-primary)" opacity={0.95}
                   />
-                  <motion.text
-                    x={x} y={lineEndY - 15} textAnchor="middle" fontSize="10" fontWeight="600" fill="var(--color-primary-foreground)"
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.3 }} style={{ pointerEvents: "none" }}
+                  <text
+                    x={pt.x} y={pt.y - 17} textAnchor="middle" fontSize="11" fontWeight="700"
+                    fill="white"
                   >
-                    {point.value}%
-                  </motion.text>
-                </>
-              ) : (
-                <motion.circle
-                  cx={x} cy={lineEndY - 12} r={3} fill="var(--color-primary)"
-                  initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.3 }} style={{ pointerEvents: "none" }}
-                />
+                    {data[i].value}%
+                  </text>
+                </motion.g>
               )}
 
-              {isSelected && (
-                <motion.circle
-                  cx={x} cy={baseline + 20} r={12} fill="var(--color-primary)"
-                  initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.3 }} style={{ pointerEvents: "none" }}
-                />
-              )}
-
+              {/* Day labels */}
               <motion.text
-                x={x} y={baseline + 21} textAnchor="middle" dominantBaseline="middle" fontSize="12" fontWeight={isSelected ? "600" : "400"}
-                fill={isSelected ? "var(--color-primary-foreground)" : "var(--color-muted-foreground)"}
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: index * 0.1 + 0.5 }}
-                style={{ cursor: "pointer" }} onClick={() => setSelectedIndex(index)}
+                x={pt.x} y={padding.top + chartH + 25}
+                textAnchor="middle" fontSize="12"
+                fontWeight={isActive ? "700" : "400"}
+                fill={isActive ? "var(--color-primary)" : "var(--color-muted-foreground)"}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 + i * 0.1 }}
+                style={{ cursor: "pointer" }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
               >
-                {point.day}
+                {data[i].day}
               </motion.text>
             </g>
           );
