@@ -150,7 +150,7 @@ const StudentModal = ({ student, onClose, onUpdateStudent }) => {
                       <Code className="w-4 h-4 text-sky-500" /> Technical Skills
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      {student.skills.map(skill => (
+                      {(student.skills || []).map(skill => (
                         <span key={skill} className="px-3 py-1 text-xs font-medium rounded-full bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-100 dark:border-sky-500/20">
                           {skill}
                         </span>

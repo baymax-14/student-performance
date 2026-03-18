@@ -115,19 +115,35 @@ const generateStudents = () => {
 };
 
 const getInitialDirectory = () => {
-  const saved = localStorage.getItem('studentDirectoryData');
-  if (saved) return JSON.parse(saved);
+  try {
+    const saved = localStorage.getItem('studentDirectoryData');
+    if (saved && saved !== "undefined") {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Cleared corrupted studentDirectoryData");
+    localStorage.removeItem('studentDirectoryData');
+  }
 
   // If there are legacy custom profiles, migrate them over
-  const legacyCustom = localStorage.getItem('customStudentProfiles');
-  const legacyList = legacyCustom ? JSON.parse(legacyCustom) : [];
+  let legacyList = [];
+  try {
+    const legacyCustom = localStorage.getItem('customStudentProfiles');
+    if (legacyCustom && legacyCustom !== "undefined") {
+      legacyList = JSON.parse(legacyCustom);
+    }
+  } catch (e) {
+    console.warn("Cleared corrupted legacy profiles");
+    localStorage.removeItem('customStudentProfiles');
+  }
   
   const generated = generateStudents();
   // Filter out generated ones if their IDs clash
-  const legacyMap = new Map(legacyList.map(s => [s.id, s]));
+  const legacyMap = new Map((legacyList || []).map(s => [s.id, s]));
   const finalGenerated = generated.filter(s => !legacyMap.has(s.id));
   
-  const combined = [...legacyList, ...finalGenerated];
+  const combined = [...(legacyList || []), ...finalGenerated];
   localStorage.setItem('studentDirectoryData', JSON.stringify(combined));
   return combined;
 };
@@ -153,11 +169,14 @@ const StudentsDirectoryPage = () => {
   };
 
   const filteredStudents = useMemo(() => {
-    let result = allStudents.filter(student => {
+    let result = (allStudents || []).filter(student => {
+      const name = student.name || "";
+      const enrollment = student.enrollment || "";
+      const skills = student.skills || [];
       const matchesBranch = activeBranch === "All" ? true : (activeBranch === "Bookmarked" ? student.isBookmarked : student.branch === activeBranch);
-      const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            student.enrollment.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            student.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            enrollment.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesBranch && matchesSearch;
     });
 
@@ -338,14 +357,14 @@ const StudentsDirectoryPage = () => {
                   
                   <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
                     <div className="flex flex-wrap gap-1.5">
-                      {student.skills.slice(0, 3).map(skill => (
+                      {(student.skills || []).slice(0, 3).map(skill => (
                         <span key={skill} className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                           {skill}
                         </span>
                       ))}
-                      {student.skills.length > 3 && (
+                      {(student.skills || []).length > 3 && (
                         <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50">
-                          +{student.skills.length - 3}
+                          +{(student.skills || []).length - 3}
                         </span>
                       )}
                     </div>
