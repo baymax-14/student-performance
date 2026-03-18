@@ -12,6 +12,7 @@ import StudentsPage from './components/pages/StudentsPage'
 import PerformancePage from './components/pages/PerformancePage'
 import SettingsPage from './components/pages/SettingsPage'
 import HelpPage from './components/pages/HelpPage'
+import StudentsDirectoryPage from './components/pages/StudentsDirectoryPage'
 import { Sun, Moon, Bell, User, LogOut, X } from 'lucide-react'
 
 function App() {
@@ -111,8 +112,10 @@ function App() {
         return <InsightsPage />;
       case 'Analytics':
         return <AnalyticsPage history={history} />;
-      case 'Students':
+      case 'Prediction History':
         return <StudentsPage history={history} />;
+      case 'Students':
+        return <StudentsDirectoryPage />;
       case 'Performance':
         return <PerformancePage />;
       case 'Settings':

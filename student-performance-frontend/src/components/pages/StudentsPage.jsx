@@ -36,8 +36,8 @@ const StudentsPage = ({ history }) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Students</h2>
-      <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Browse all prediction records as student profiles.</p>
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Prediction History</h2>
+      <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Browse all past predictions and outcomes.</p>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">

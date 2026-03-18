@@ -36,6 +36,7 @@ const Sidebar = ({ open, setOpen, selected, setSelected }) => {
         <Option Icon={Home} title="Dashboard" selected={selected} setSelected={setSelected} open={open} />
         <Option Icon={BarChart3} title="Analytics" selected={selected} setSelected={setSelected} open={open} />
         <Option Icon={Users} title="Students" selected={selected} setSelected={setSelected} open={open} />
+        <Option Icon={Activity} title="Prediction History" selected={selected} setSelected={setSelected} open={open} />
         <Option Icon={TrendingUp} title="Performance" selected={selected} setSelected={setSelected} open={open} />
       </div>
 
