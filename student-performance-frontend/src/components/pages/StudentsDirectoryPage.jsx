@@ -42,14 +42,19 @@ const CERTS_BY_BRANCH = {
 const generateStudents = () => {
   const students = [];
   let idCounter = 1;
-  const yearPrefixes = ["2020", "2021", "2022", "2023"];
 
   BRANCHES.forEach(branch => {
-    const code = branch.substring(0, 2).toUpperCase();
+    let code = "XX";
+    if (branch === "CSE") code = "CS";
+    else if (branch === "IT") code = "IT";
+    else if (branch === "EXTC") code = "EX";
+    else if (branch === "Mechanical") code = "ME";
+    else if (branch === "Civil") code = "CE";
+    
     for (let i = 0; i < 70; i++) {
       const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
       const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-      const year = yearPrefixes[Math.floor(Math.random() * yearPrefixes.length)];
+      const yearVal = ["20", "21", "22", "23"][Math.floor(Math.random() * 4)];
       const randomNum = Math.floor(Math.random() * 9000 + 1000);
       
       // Determine base stats based on a normal-ish distribution
@@ -71,7 +76,7 @@ const generateStudents = () => {
       students.push({
         id: idCounter++,
         name: `${firstName} ${lastName}`,
-        enrollment: `${year}${code}${randomNum}`,
+        enrollment: `${yearVal}BT${code}${randomNum}`,
         branch: branch,
         cgpa: parseFloat(cgpa),
         attendance: Math.floor(Math.random() * 30 + 70), // 70 to 100
@@ -89,7 +94,7 @@ const generateStudents = () => {
   const keshav = {
     id: 999999,
     name: "Keshav Raypure",
-    enrollment: "2023IT0001",
+    enrollment: "23BTIT1021",
     branch: "IT",
     cgpa: 9.25,
     attendance: 95,
