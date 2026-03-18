@@ -14,7 +14,10 @@ import {
   Award,
   BookOpen,
   Calendar,
-  Check
+  Check,
+  Target,
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 
 const BRANCHES = ["CSE", "IT", "EXTC", "Mechanical", "Civil"];
@@ -505,6 +508,101 @@ const StudentsDirectoryPage = () => {
                     </div>
                   </div>
                 </div>
+                
+                {/* AI Job Readiness Predictor Section */}
+                {selectedStudent && (
+                  (() => {
+                    const certsCount = selectedStudent.certifications?.length || 0;
+                    const internCount = selectedStudent.internships || 0;
+                    const projCount = selectedStudent.projects || 0;
+                    const cgpa = selectedStudent.cgpa || 0;
+
+                    // Weights: Certs 30%, Intern 25%, Proj 20%, CGPA 25%
+                    const certScore = Math.min(certsCount, 5) / 5 * 30;
+                    const internScore = Math.min(internCount, 1) / 1 * 25;
+                    const projScore = Math.min(projCount, 2) / 2 * 20;
+                    const cgpaScore = cgpa >= 7.5 ? 25 : (cgpa / 7.5) * 25;
+
+                    const totalScore = Math.round(certScore + internScore + projScore + cgpaScore);
+
+                    const radius = 36;
+                    const circumference = 2 * Math.PI * radius;
+                    const strokeDashoffset = circumference - (totalScore / 100) * circumference;
+
+                    const isReady = totalScore >= 80;
+
+                    const improvements = [];
+                    if (certsCount < 5) improvements.push(`Complete ${5 - certsCount} more certification(s)`);
+                    if (internCount < 1) improvements.push("Secure at least 1 internship");
+                    if (projCount < 2) improvements.push(`Build ${2 - projCount} more project(s)`);
+                    if (cgpa < 7.5) improvements.push(`Improve CGPA to > 7.5`);
+
+                    return (
+                      <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
+                        <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
+                          <Target className="w-5 h-5 text-indigo-500" />
+                          AI Job Recruitment Predictor
+                        </h4>
+                        
+                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-slate-200 dark:border-slate-700/50 flex flex-col sm:flex-row gap-6 items-center">
+                          {/* Donut Chart */}
+                          <div className="relative flex items-center justify-center shrink-0">
+                            <svg width="100" height="100" className="transform -rotate-90">
+                              <circle 
+                                cx="50" cy="50" r={radius} 
+                                className="stroke-slate-200 dark:stroke-slate-800" 
+                                strokeWidth="8" fill="none" 
+                              />
+                              <motion.circle 
+                                cx="50" cy="50" r={radius} 
+                                className={isReady ? "stroke-emerald-500" : "stroke-amber-500"} 
+                                strokeWidth="8" fill="none" 
+                                strokeLinecap="round"
+                                initial={{ strokeDashoffset: circumference }}
+                                animate={{ strokeDashoffset }}
+                                transition={{ duration: 1.5, ease: "easeOut" }}
+                                style={{ strokeDasharray: circumference }}
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <span className="text-2xl font-bold text-slate-900 dark:text-white">{totalScore}%</span>
+                            </div>
+                          </div>
+
+                          {/* Predictor Text & Advice */}
+                          <div className="flex-1">
+                            {isReady ? (
+                              <div className="space-y-2">
+                                <h5 className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-2">
+                                  <CheckCircle2 className="w-5 h-5" /> Highly Recommended for Recruitment!
+                                </h5>
+                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                  You meet or exceed the core criteria that top recruiters are looking for. You are good to go!
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <h5 className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-2">
+                                  <AlertCircle className="w-5 h-5" /> Improvement Needed
+                                </h5>
+                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                                  You are on the right track, but recruiters typically look for the following minimums. To reach 100% readiness, you should:
+                                </p>
+                                <ul className="space-y-1">
+                                  {improvements.map((imp, idx) => (
+                                    <li key={idx} className="flex items-start gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                      <span className="text-amber-500">→</span> {imp}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()
+                )}
               </div>
             </motion.div>
           </div>
