@@ -85,8 +85,29 @@ const generateStudents = () => {
     }
   });
 
-  // Shuffle the final array so all branches aren't clumped together
-  return students.sort(() => Math.random() - 0.5);
+  // Always include Keshav Raypure at the top, guaranteed to be first
+  const keshav = {
+    id: 999999,
+    name: "Keshav Raypure",
+    enrollment: "2023IT0001",
+    branch: "IT",
+    cgpa: 9.85,
+    attendance: 98,
+    projects: 5,
+    internships: 2,
+    skills: ["React", "Node.js", "Python", "AWS", "Machine Learning", "System Design"],
+    certifications: ["AWS Solutions Architect", "Meta Front-End Developer"],
+    email: "keshav.raypure@edu.in",
+    location: "Amravati"
+  };
+
+  // Shuffle the rest so all branches aren't clumped together
+  students.sort(() => Math.random() - 0.5);
+  
+  // Put Keshav at index 0
+  students.unshift(keshav);
+  
+  return students;
 };
 
 const DUMMY_STUDENTS = generateStudents();
