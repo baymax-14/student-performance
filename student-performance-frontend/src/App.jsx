@@ -18,8 +18,15 @@ import { Sun, Moon, Bell, User, LogOut, X } from 'lucide-react'
 function App() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
-  const [history, setHistory] = useState([])
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem('predictionHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    localStorage.setItem('predictionHistory', JSON.stringify(history));
+  }, [history]);
   
   const [isDark, setIsDark] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)

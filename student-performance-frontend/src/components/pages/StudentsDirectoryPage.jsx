@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -9,10 +9,12 @@ import {
   Linkedin, 
   Mail,
   X,
+  Plus,
   Code,
   Award,
   BookOpen,
-  Calendar
+  Calendar,
+  Check
 } from 'lucide-react';
 
 const BRANCHES = ["CSE", "IT", "EXTC", "Mechanical", "Civil"];
@@ -93,9 +95,55 @@ const StudentsDirectoryPage = () => {
   const [activeBranch, setActiveBranch] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
+  
+  // Custom user-added profiles stored in localStorage
+  const [customStudents, setCustomStudents] = useState(() => {
+    const saved = localStorage.getItem('customStudentProfiles');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // State for inline certification adding
+  const [isAddingCert, setIsAddingCert] = useState(false);
+  const [newCertValue, setNewCertValue] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem('customStudentProfiles', JSON.stringify(customStudents));
+  }, [customStudents]);
+
+  const allStudents = useMemo(() => {
+    const customMap = new Map(customStudents.map(s => [s.id, s]));
+    const dummyFiltered = DUMMY_STUDENTS.filter(s => !customMap.has(s.id));
+    return [...customStudents, ...dummyFiltered];
+  }, [customStudents]);
+
+  const handleAddCert = () => {
+    if (!newCertValue.trim() || !selectedStudent) return;
+    
+    const updatedStudent = {
+      ...selectedStudent, 
+      certifications: [...(selectedStudent.certifications || []), newCertValue.trim()]
+    };
+    
+    // Update local modal state immediately for snappy UI
+    setSelectedStudent(updatedStudent);
+    
+    // Update global storage state
+    setCustomStudents(prev => {
+      const exists = prev.find(s => s.id === updatedStudent.id);
+      if (exists) {
+        return prev.map(s => s.id === updatedStudent.id ? updatedStudent : s);
+      } else {
+        return [updatedStudent, ...prev];
+      }
+    });
+    
+    setNewCertValue("");
+    setIsAddingCert(false);
+  };
 
   const filteredStudents = useMemo(() => {
-    return DUMMY_STUDENTS.filter(student => {
+    return allStudents.filter(student => {
       const matchesBranch = activeBranch === "All" || student.branch === activeBranch;
       const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             student.enrollment.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -124,15 +172,23 @@ const StudentsDirectoryPage = () => {
           <h1 className="text-3xl font-bold tracking-tight mb-2">Students Hub</h1>
           <p className="text-sky-100 mb-6">Explore detailed academic profiles for recruitment and placement insights.</p>
           
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search by name, enrollment ID, or skills (e.g. React, Python)..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/10 dark:bg-black/20 border border-white/20 text-white placeholder-sky-200 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm transition-all"
-            />
+          <div className="flex flex-col sm:flex-row gap-4 mb-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search by name, skills, etc..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/10 dark:bg-black/20 border border-white/20 text-white placeholder-sky-200 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm transition-all"
+              />
+            </div>
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center justify-center gap-2 bg-white text-sky-600 hover:bg-sky-50 px-5 py-3 rounded-xl font-bold shadow-lg transition-all"
+            >
+              <Plus className="w-5 h-5" /> Add Profile
+            </button>
           </div>
         </div>
 
@@ -143,7 +199,7 @@ const StudentsDirectoryPage = () => {
             </div>
             <div>
               <p className="text-xs text-sky-100 uppercase tracking-wider font-semibold">Total Profiles</p>
-              <p className="text-2xl font-bold">{DUMMY_STUDENTS.length}</p>
+              <p className="text-2xl font-bold">{allStudents.length}</p>
             </div>
           </div>
         </div>
@@ -171,7 +227,7 @@ const StudentsDirectoryPage = () => {
                 : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             }`}
           >
-            {branch} <span className="ml-1 opacity-60 text-xs">({DUMMY_STUDENTS.filter(s => s.branch === branch).length})</span>
+            {branch} <span className="ml-1 opacity-60 text-xs">({allStudents.filter(s => s.branch === branch).length})</span>
           </button>
         ))}
       </div>
@@ -306,21 +362,72 @@ const StudentsDirectoryPage = () => {
                       </div>
                     </div>
 
-                    {selectedStudent.certifications && selectedStudent.certifications.length > 0 && (
-                      <div>
-                        <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">
+                    {/* Always render Certifications section so we can add to it even if empty */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                           <Award className="w-4 h-4 text-amber-500" />
                           Certifications
                         </h4>
-                        <ul className="space-y-2">
-                          {selectedStudent.certifications.map(cert => (
-                            <li key={cert} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
-                              <span className="text-amber-500 mt-0.5">✦</span> {cert}
-                            </li>
-                          ))}
-                        </ul>
+                        {!isAddingCert && (
+                          <button 
+                            onClick={() => setIsAddingCert(true)} 
+                            className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 px-2 py-1 rounded-md hover:bg-sky-100 dark:hover:bg-sky-500/20 transition-colors"
+                          >
+                            <Plus className="w-3 h-3" /> Add
+                          </button>
+                        )}
                       </div>
-                    )}
+                      
+                      <ul className="space-y-2 mb-3">
+                        {(selectedStudent.certifications || []).map(cert => (
+                          <li key={cert} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                            <span className="text-amber-500 mt-0.5">✦</span> {cert}
+                          </li>
+                        ))}
+                        {(!selectedStudent.certifications || selectedStudent.certifications.length === 0) && !isAddingCert && (
+                          <li className="text-sm text-slate-400 italic">No certifications listed</li>
+                        )}
+                      </ul>
+
+                      {/* Add Certification Input */}
+                      <AnimatePresence>
+                        {isAddingCert && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="flex items-center gap-2 mt-2"
+                          >
+                            <input
+                              autoFocus
+                              type="text"
+                              value={newCertValue}
+                              onChange={(e) => setNewCertValue(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleAddCert()}
+                              placeholder="e.g. AWS Cloud Practitioner"
+                              className="flex-1 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 outline-none focus:ring-2 focus:ring-sky-500"
+                            />
+                            <button
+                              onClick={handleAddCert}
+                              disabled={!newCertValue.trim()}
+                              className="p-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 text-white rounded-lg transition-colors"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setIsAddingCert(false);
+                                setNewCertValue("");
+                              }}
+                              className="p-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
 
                     <div>
                       <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">
@@ -373,6 +480,130 @@ const StudentsDirectoryPage = () => {
                   </div>
                 </div>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Profile Modal */}
+      <AnimatePresence>
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+              onClick={() => setShowAddModal(false)}
+            />
+            
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="bg-slate-50 dark:bg-slate-950 p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">Create Your Profile</h2>
+                  <p className="text-sm text-slate-500">Showcase your skills and certifications to recruiters.</p>
+                </div>
+                <button onClick={() => setShowAddModal(false)} className="p-2 border border-slate-200 dark:border-slate-800 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form 
+                className="p-6 overflow-y-auto max-h-[70vh] space-y-4 text-sm"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.target);
+                  const skillsRaw = fd.get("skills");
+                  const certsRaw = fd.get("certifications");
+                  
+                  const newProfile = {
+                    id: Date.now(),
+                    name: fd.get("name"),
+                    enrollment: fd.get("enrollment"),
+                    branch: fd.get("branch"),
+                    cgpa: parseFloat(fd.get("cgpa")),
+                    attendance: parseInt(fd.get("attendance") || 85),
+                    projects: parseInt(fd.get("projects") || 0),
+                    internships: parseInt(fd.get("internships") || 0),
+                    email: fd.get("email"),
+                    location: fd.get("location") || "India",
+                    skills: skillsRaw ? skillsRaw.split(',').map(s=>s.trim()).filter(Boolean) : [],
+                    certifications: certsRaw ? certsRaw.split(',').map(s=>s.trim()).filter(Boolean) : []
+                  };
+                  
+                  setCustomStudents([newProfile, ...customStudents]);
+                  setShowAddModal(false);
+                }}
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 dark:text-slate-300">Name</label>
+                    <input required name="name" type="text" className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-sky-500" placeholder="e.g. John Doe" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 dark:text-slate-300">Enrollment No.</label>
+                    <input required name="enrollment" type="text" className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-sky-500" placeholder="e.g. 2023CS1234" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 dark:text-slate-300">Branch</label>
+                    <select name="branch" className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-sky-500">
+                      {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 dark:text-slate-300">CGPA (0 - 10)</label>
+                    <input required name="cgpa" type="number" step="0.1" min="0" max="10" className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-sky-500" placeholder="e.g. 8.5" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
+                  <input required name="email" type="email" className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-sky-500" placeholder="e.g. john@edu.in" />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <Code className="w-4 h-4 text-sky-500" />
+                    Skills <span className="text-slate-400 font-normal">(Comma separated)</span>
+                  </label>
+                  <input name="skills" type="text" className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-sky-500" placeholder="e.g. React, Python, Data Analysis" />
+                </div>
+
+                <div className="space-y-1 pb-4 border-b border-slate-200 dark:border-slate-800">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <Award className="w-4 h-4 text-amber-500" />
+                    Certifications <span className="text-slate-400 font-normal">(Comma separated)</span>
+                  </label>
+                  <input name="certifications" type="text" className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-sky-500" placeholder="e.g. AWS Cloud Practitioner, CCNA" />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 pt-2">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 dark:text-slate-300 text-xs text-center block">Attendance %</label>
+                    <input name="attendance" type="number" min="0" max="100" defaultValue={85} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-center outline-none focus:ring-2 focus:ring-sky-500" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 dark:text-slate-300 text-xs text-center block">Projects</label>
+                    <input name="projects" type="number" min="0" defaultValue={1} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-center outline-none focus:ring-2 focus:ring-sky-500" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 dark:text-slate-300 text-xs text-center block">Internships</label>
+                    <input name="internships" type="number" min="0" defaultValue={0} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-center outline-none focus:ring-2 focus:ring-sky-500" />
+                  </div>
+                </div>
+
+                <button type="submit" className="w-full py-3 mt-4 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold shadow-lg shadow-sky-500/30 transition-all">
+                  Publish My Profile
+                </button>
+              </form>
             </motion.div>
           </div>
         )}
