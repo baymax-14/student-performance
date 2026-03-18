@@ -1,24 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  MapPin, 
-  Briefcase, 
-  GraduationCap, 
-  Github, 
-  Linkedin, 
-  Mail,
-  X,
+import StudentModal from '../StudentModal';
+import {
+  Search,
+  GraduationCap,
+  Github,
   Plus,
   Code,
   Award,
   BookOpen,
   Calendar,
   Check,
-  Target,
-  AlertCircle,
-  CheckCircle2
+  X,
+  Star
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const BRANCHES = ["CSE", "IT", "EXTC", "Mechanical", "Civil"];
 
@@ -88,7 +84,7 @@ const generateStudents = () => {
         skills: studentSkills,
         certifications: studentCerts,
         email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${randomNum.toString().substring(0,2)}@edu.in`,
-        location: ["Mumbai", "Pune", "Bangalore", "Delhi", "Hyderabad"][Math.floor(Math.random() * 5)]
+        location: "Amravati"
       });
     }
   });
@@ -118,68 +114,61 @@ const generateStudents = () => {
   return students;
 };
 
-const DUMMY_STUDENTS = generateStudents();
+const getInitialDirectory = () => {
+  const saved = localStorage.getItem('studentDirectoryData');
+  if (saved) return JSON.parse(saved);
+
+  // If there are legacy custom profiles, migrate them over
+  const legacyCustom = localStorage.getItem('customStudentProfiles');
+  const legacyList = legacyCustom ? JSON.parse(legacyCustom) : [];
+  
+  const generated = generateStudents();
+  // Filter out generated ones if their IDs clash
+  const legacyMap = new Map(legacyList.map(s => [s.id, s]));
+  const finalGenerated = generated.filter(s => !legacyMap.has(s.id));
+  
+  const combined = [...legacyList, ...finalGenerated];
+  localStorage.setItem('studentDirectoryData', JSON.stringify(combined));
+  return combined;
+};
 
 const StudentsDirectoryPage = () => {
   const [activeBranch, setActiveBranch] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("default");
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(24);
   
-  // Custom user-added profiles stored in localStorage
-  const [customStudents, setCustomStudents] = useState(() => {
-    const saved = localStorage.getItem('customStudentProfiles');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [allStudents, setAllStudents] = useState(getInitialDirectory);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // State for inline certification adding
-  const [isAddingCert, setIsAddingCert] = useState(false);
-  const [newCertValue, setNewCertValue] = useState("");
-
   useEffect(() => {
-    localStorage.setItem('customStudentProfiles', JSON.stringify(customStudents));
-  }, [customStudents]);
+    localStorage.setItem('studentDirectoryData', JSON.stringify(allStudents));
+  }, [allStudents]);
 
-  const allStudents = useMemo(() => {
-    const customMap = new Map(customStudents.map(s => [s.id, s]));
-    const dummyFiltered = DUMMY_STUDENTS.filter(s => !customMap.has(s.id));
-    return [...customStudents, ...dummyFiltered];
-  }, [customStudents]);
-
-  const handleAddCert = () => {
-    if (!newCertValue.trim() || !selectedStudent) return;
-    
-    const updatedStudent = {
-      ...selectedStudent, 
-      certifications: [...(selectedStudent.certifications || []), newCertValue.trim()]
-    };
-    
-    // Update local modal state immediately for snappy UI
+  // Called by StudentModal when the student is updated (e.g. cert added or bookmarked)
+  const handleUpdateStudent = (updatedStudent) => {
     setSelectedStudent(updatedStudent);
-    
-    // Update global storage state
-    setCustomStudents(prev => {
-      const exists = prev.find(s => s.id === updatedStudent.id);
-      if (exists) {
-        return prev.map(s => s.id === updatedStudent.id ? updatedStudent : s);
-      } else {
-        return [updatedStudent, ...prev];
-      }
-    });
-    
-    setNewCertValue("");
-    setIsAddingCert(false);
+    setAllStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
   };
 
   const filteredStudents = useMemo(() => {
-    return allStudents.filter(student => {
-      const matchesBranch = activeBranch === "All" || student.branch === activeBranch;
+    let result = allStudents.filter(student => {
+      const matchesBranch = activeBranch === "All" ? true : (activeBranch === "Bookmarked" ? student.isBookmarked : student.branch === activeBranch);
       const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             student.enrollment.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             student.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesBranch && matchesSearch;
     });
-  }, [activeBranch, searchQuery]);
+
+    if (sortBy === "alphabet") {
+      result = result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === "cgpa") {
+      result = result.sort((a, b) => b.cgpa - a.cgpa);
+    }
+
+    return result;
+  }, [allStudents, activeBranch, searchQuery, sortBy]);
 
   // For recruiter visual cue on CGPA
   const getCgpaColor = (cgpa) => {
@@ -234,10 +223,11 @@ const StudentsDirectoryPage = () => {
         </div>
       </div>
 
-      {/* Filters (Tabs) */}
-      <div className="flex flex-wrap items-center gap-2 mb-8 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <button
-          onClick={() => setActiveBranch("All")}
+      {/* Filters and Sorting */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-wrap items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <button
+          onClick={() => { setActiveBranch("All"); setVisibleCount(24); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeBranch === "All" 
               ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm" 
@@ -249,7 +239,7 @@ const StudentsDirectoryPage = () => {
         {BRANCHES.map(branch => (
           <button
             key={branch}
-            onClick={() => setActiveBranch(branch)}
+            onClick={() => { setActiveBranch(branch); setVisibleCount(24); }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               activeBranch === branch 
                 ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm" 
@@ -259,6 +249,32 @@ const StudentsDirectoryPage = () => {
             {branch} <span className="ml-1 opacity-60 text-xs">({allStudents.filter(s => s.branch === branch).length})</span>
           </button>
         ))}
+          <button
+            onClick={() => { setActiveBranch("Bookmarked"); setVisibleCount(24); }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+              activeBranch === "Bookmarked" 
+                ? "bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 shadow-sm border border-amber-200 dark:border-amber-800" 
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+          >
+            <Star className={`w-3.5 h-3.5 ${activeBranch === "Bookmarked" ? 'fill-amber-500 text-amber-500' : ''}`} />
+            Bookmarked <span className="ml-1 opacity-60 text-xs">({allStudents.filter(s => s.isBookmarked).length})</span>
+          </button>
+        </div>
+
+        {/* Sort Select */}
+        <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
+          <span className="text-sm text-slate-500 font-medium px-2">Sort by:</span>
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 py-1.5 px-3 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer"
+          >
+            <option value="default">Default</option>
+            <option value="alphabet">Alphabet (A-Z)</option>
+            <option value="cgpa">CGPA (High to Low)</option>
+          </select>
+        </div>
       </div>
 
       {/* Grid */}
@@ -270,7 +286,7 @@ const StudentsDirectoryPage = () => {
               <p>No students found matching your search.</p>
             </div>
           ) : (
-            filteredStudents.map(student => (
+            filteredStudents.slice(0, visibleCount).map(student => (
               <motion.div
                 layout
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -278,16 +294,39 @@ const StudentsDirectoryPage = () => {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
                 key={student.id}
-                onClick={() => setSelectedStudent(student)}
-                className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg dark:hover:shadow-slate-900/50 hover:border-sky-300 dark:hover:border-sky-700 transition-all cursor-pointer flex flex-col"
+                onClick={() => {
+                  setSelectedStudent(student);
+                  // Ensure predictor resets internally or in modal handler
+                }}
+                className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg dark:hover:shadow-slate-900/50 hover:border-sky-300 dark:hover:border-sky-700 transition-all cursor-pointer flex flex-col"
               >
-                <div className="flex justify-between items-start mb-4">
+                {/* Bookmark Toggle */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const newStatus = !student.isBookmarked;
+                    handleUpdateStudent({ ...student, isBookmarked: newStatus });
+                    if (newStatus) {
+                      toast.success(`${student.name} bookmarked!`);
+                    } else {
+                      toast.error(`${student.name} removed from bookmarks.`);
+                    }
+                  }}
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors z-10"
+                >
+                  <Star className={`w-4 h-4 transition-colors ${student.isBookmarked ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-600'}`} />
+                </button>
+
+                <div className="flex justify-between items-start mb-4 pr-8">
                   <div>
                     <h3 className="font-bold text-slate-800 dark:text-slate-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{student.name}</h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono uppercase tracking-wider">{student.enrollment}</p>
                   </div>
-                  <div className={`px-2.5 py-1 rounded-md border text-xs font-bold ${getCgpaColor(student.cgpa)}`}>
-                    {student.cgpa}
+                </div>
+
+                <div className="mb-4">
+                  <div className={`inline-flex px-2.5 py-1 rounded-md border text-xs font-bold ${getCgpaColor(student.cgpa)}`}>
+                    {student.cgpa} CGPA
                   </div>
                 </div>
 
@@ -318,296 +357,26 @@ const StudentsDirectoryPage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Recruiter Modal */}
-      <AnimatePresence>
-        {selectedStudent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-              onClick={() => setSelectedStudent(null)}
-            />
-            
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-            >
-              {/* Modal Header */}
-              <div className="bg-slate-50 dark:bg-slate-950 p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-start shrink-0">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center text-white text-2xl font-bold shadow-md">
-                    {selectedStudent.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{selectedStudent.name}</h2>
-                    <p className="text-sm font-mono text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">{selectedStudent.enrollment} • {selectedStudent.branch}</p>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedStudent(null)} className="p-2 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+      {/* Pagination Load More */}
+      {visibleCount < filteredStudents.length && (
+        <div className="mt-12 flex justify-center">
+          <button 
+            onClick={() => setVisibleCount(prev => prev + 24)}
+            className="px-6 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl shadow-sm hover:shadow-md hover:border-sky-300 dark:hover:border-sky-700 transition-all"
+          >
+            Load More Students ({filteredStudents.length - visibleCount} remaining)
+          </button>
+        </div>
+      )}
 
-              {/* Modal Body */}
-              <div className="p-6 overflow-y-auto w-full space-y-8">
-                {/* Stats Row */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">CGPA</p>
-                    <p className={`text-2xl font-bold ${getCgpaColor(selectedStudent.cgpa).split(" ")[0]}`}>{selectedStudent.cgpa}</p>
-                  </div>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Projects</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-white">{selectedStudent.projects}</p>
-                  </div>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Internships</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-white">{selectedStudent.internships}</p>
-                  </div>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Attendance</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-white">{selectedStudent.attendance}%</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Left Column */}
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">
-                        <Code className="w-4 h-4 text-sky-500" />
-                        Technical Skills
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedStudent.skills.map(skill => (
-                          <span key={skill} className="px-3 py-1 text-xs font-medium rounded-full bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-100 dark:border-sky-500/20">
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Always render Certifications section so we can add to it even if empty */}
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                          <Award className="w-4 h-4 text-amber-500" />
-                          Certifications
-                        </h4>
-                        {!isAddingCert && (
-                          <button 
-                            onClick={() => setIsAddingCert(true)} 
-                            className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 px-2 py-1 rounded-md hover:bg-sky-100 dark:hover:bg-sky-500/20 transition-colors"
-                          >
-                            <Plus className="w-3 h-3" /> Add
-                          </button>
-                        )}
-                      </div>
-                      
-                      <ul className="space-y-2 mb-3">
-                        {(selectedStudent.certifications || []).map(cert => (
-                          <li key={cert} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
-                            <span className="text-amber-500 mt-0.5">✦</span> {cert}
-                          </li>
-                        ))}
-                        {(!selectedStudent.certifications || selectedStudent.certifications.length === 0) && !isAddingCert && (
-                          <li className="text-sm text-slate-400 italic">No certifications listed</li>
-                        )}
-                      </ul>
-
-                      {/* Add Certification Input */}
-                      <AnimatePresence>
-                        {isAddingCert && (
-                          <motion.div 
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="flex items-center gap-2 mt-2"
-                          >
-                            <input
-                              autoFocus
-                              type="text"
-                              value={newCertValue}
-                              onChange={(e) => setNewCertValue(e.target.value)}
-                              onKeyDown={(e) => e.key === 'Enter' && handleAddCert()}
-                              placeholder="e.g. AWS Cloud Practitioner"
-                              className="flex-1 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 outline-none focus:ring-2 focus:ring-sky-500"
-                            />
-                            <button
-                              onClick={handleAddCert}
-                              disabled={!newCertValue.trim()}
-                              className="p-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 text-white rounded-lg transition-colors"
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setIsAddingCert(false);
-                                setNewCertValue("");
-                              }}
-                              className="p-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-
-                    <div>
-                      <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">
-                        <BookOpen className="w-4 h-4 text-emerald-500" />
-                        Key Highlights
-                      </h4>
-                      <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                        {selectedStudent.cgpa >= 8.5 && <li className="flex gap-2"><span className="text-emerald-500 font-bold">✓</span> Top 10% in batch</li>}
-                        {selectedStudent.internships > 0 && <li className="flex gap-2"><span className="text-emerald-500 font-bold">✓</span> Has industry internship experience</li>}
-                        {selectedStudent.projects >= 3 && <li className="flex gap-2"><span className="text-emerald-500 font-bold">✓</span> Strong project portfolio</li>}
-                        <li className="flex gap-2"><span className="text-emerald-500 font-bold">✓</span> Pre-assessed via EduPredict ML module</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Right Column */}
-                  <div>
-                    <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
-                      <Mail className="w-4 h-4 text-indigo-500" />
-                      Contact & Links
-                    </h4>
-                    <div className="space-y-3">
-                      <a href={`mailto:${selectedStudent.email}`} className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
-                        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-md group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
-                          <Mail className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                        </div>
-                        <div className="flex-1 overflow-hidden">
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">Email Address</p>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{selectedStudent.email}</p>
-                        </div>
-                      </a>
-                      <a href="#" className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
-                        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-md group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
-                          <MapPin className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                        </div>
-                        <div className="flex-1 overflow-hidden">
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">Location</p>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{selectedStudent.location}, India</p>
-                        </div>
-                      </a>
-                      <div className="flex gap-3">
-                        <a href="#" className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium">
-                          <Linkedin className="w-4 h-4" /> LinkedIn
-                        </a>
-                        <a href="#" className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium">
-                          <Github className="w-4 h-4" /> GitHub
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* AI Job Readiness Predictor Section */}
-                {selectedStudent && (
-                  (() => {
-                    const certsCount = selectedStudent.certifications?.length || 0;
-                    const internCount = selectedStudent.internships || 0;
-                    const projCount = selectedStudent.projects || 0;
-                    const cgpa = selectedStudent.cgpa || 0;
-
-                    // Weights: Certs 30%, Intern 25%, Proj 20%, CGPA 25%
-                    const certScore = Math.min(certsCount, 5) / 5 * 30;
-                    const internScore = Math.min(internCount, 1) / 1 * 25;
-                    const projScore = Math.min(projCount, 2) / 2 * 20;
-                    const cgpaScore = cgpa >= 7.5 ? 25 : (cgpa / 7.5) * 25;
-
-                    const totalScore = Math.round(certScore + internScore + projScore + cgpaScore);
-
-                    const radius = 36;
-                    const circumference = 2 * Math.PI * radius;
-                    const strokeDashoffset = circumference - (totalScore / 100) * circumference;
-
-                    const isReady = totalScore >= 80;
-
-                    const improvements = [];
-                    if (certsCount < 5) improvements.push(`Complete ${5 - certsCount} more certification(s)`);
-                    if (internCount < 1) improvements.push("Secure at least 1 internship");
-                    if (projCount < 2) improvements.push(`Build ${2 - projCount} more project(s)`);
-                    if (cgpa < 7.5) improvements.push(`Improve CGPA to > 7.5`);
-
-                    return (
-                      <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
-                        <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
-                          <Target className="w-5 h-5 text-indigo-500" />
-                          AI Job Recruitment Predictor
-                        </h4>
-                        
-                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-slate-200 dark:border-slate-700/50 flex flex-col sm:flex-row gap-6 items-center">
-                          {/* Donut Chart */}
-                          <div className="relative flex items-center justify-center shrink-0">
-                            <svg width="100" height="100" className="transform -rotate-90">
-                              <circle 
-                                cx="50" cy="50" r={radius} 
-                                className="stroke-slate-200 dark:stroke-slate-800" 
-                                strokeWidth="8" fill="none" 
-                              />
-                              <motion.circle 
-                                cx="50" cy="50" r={radius} 
-                                className={isReady ? "stroke-emerald-500" : "stroke-amber-500"} 
-                                strokeWidth="8" fill="none" 
-                                strokeLinecap="round"
-                                initial={{ strokeDashoffset: circumference }}
-                                animate={{ strokeDashoffset }}
-                                transition={{ duration: 1.5, ease: "easeOut" }}
-                                style={{ strokeDasharray: circumference }}
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="text-2xl font-bold text-slate-900 dark:text-white">{totalScore}%</span>
-                            </div>
-                          </div>
-
-                          {/* Predictor Text & Advice */}
-                          <div className="flex-1">
-                            {isReady ? (
-                              <div className="space-y-2">
-                                <h5 className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-2">
-                                  <CheckCircle2 className="w-5 h-5" /> Highly Recommended for Recruitment!
-                                </h5>
-                                <p className="text-sm text-slate-600 dark:text-slate-400">
-                                  You meet or exceed the core criteria that top recruiters are looking for. You are good to go!
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="space-y-2">
-                                <h5 className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-2">
-                                  <AlertCircle className="w-5 h-5" /> Improvement Needed
-                                </h5>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-                                  You are on the right track, but recruiters typically look for the following minimums. To reach 100% readiness, you should:
-                                </p>
-                                <ul className="space-y-1">
-                                  {improvements.map((imp, idx) => (
-                                    <li key={idx} className="flex items-start gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                      <span className="text-amber-500">→</span> {imp}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Student Profile Modal */}
+      {selectedStudent && (
+        <StudentModal
+          student={selectedStudent}
+          onClose={() => setSelectedStudent(null)}
+          onUpdateStudent={handleUpdateStudent}
+        />
+      )}
 
       {/* Add Profile Modal */}
       <AnimatePresence>
@@ -655,12 +424,13 @@ const StudentsDirectoryPage = () => {
                     projects: parseInt(fd.get("projects") || 0),
                     internships: parseInt(fd.get("internships") || 0),
                     email: fd.get("email"),
-                    location: fd.get("location") || "India",
+                    location: fd.get("location") || "Amravati",
+                    isBookmarked: false,
                     skills: skillsRaw ? skillsRaw.split(',').map(s=>s.trim()).filter(Boolean) : [],
                     certifications: certsRaw ? certsRaw.split(',').map(s=>s.trim()).filter(Boolean) : []
                   };
                   
-                  setCustomStudents([newProfile, ...customStudents]);
+                  setAllStudents([newProfile, ...allStudents]);
                   setShowAddModal(false);
                 }}
               >

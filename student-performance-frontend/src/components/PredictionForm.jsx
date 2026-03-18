@@ -43,6 +43,7 @@ const inputBase = "w-full bg-slate-50/80 dark:bg-slate-800/50 border border-slat
 const selectBase = `${inputBase} appearance-none cursor-pointer`
 
 const PredictionForm = ({ onPredict, isLoading }) => {
+  const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
     attendance: 80,
     internal_avg: 15,
@@ -63,7 +64,11 @@ const PredictionForm = ({ onPredict, isLoading }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onPredict(formData)
+    if (step === 1) {
+      setStep(2)
+    } else {
+      onPredict(formData)
+    }
   }
 
   const handleSampleData = () => {
@@ -79,6 +84,7 @@ const PredictionForm = ({ onPredict, isLoading }) => {
   }
 
   const handleReset = () => {
+    setStep(1)
     setFormData({
       attendance: 80,
       internal_avg: 15,
@@ -102,121 +108,176 @@ const PredictionForm = ({ onPredict, isLoading }) => {
       <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-sky-400/20 to-indigo-400/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-gradient-to-tr from-emerald-400/10 to-sky-400/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Header */}
+      {/* Header & Progress */}
       <motion.div 
-        className="flex items-center gap-3 mb-8 relative"
+        className="mb-8 relative"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <div className="p-2.5 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-xl shadow-lg shadow-sky-500/25">
-          <GraduationCap className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2.5 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-xl shadow-lg shadow-sky-500/25">
+            <GraduationCap className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white">Student Profiler</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Step {step} of 2 - {step === 1 ? "Academic Stats" : "Study Habits & Support"}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-bold text-slate-800 dark:text-white">Student Profiler</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Enter academic details for AI prediction</p>
+        
+        {/* Progress Bar */}
+        <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-sky-500 to-indigo-500"
+            initial={{ width: "50%" }}
+            animate={{ width: step === 1 ? "50%" : "100%" }}
+            transition={{ ease: "easeInOut", duration: 0.3 }}
+          />
         </div>
       </motion.div>
 
-      {/* Fields */}
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 relative"
-        variants={container}
-        initial="hidden"
-        animate="show"
-      >
-        <InputField icon={BookOpen} label="Attendance (%)" color="bg-emerald-500">
-          <input type="number" name="attendance" min="0" max="100" value={formData.attendance} onChange={handleChange} required disabled={isLoading} className={inputBase} />
-        </InputField>
+      {/* Fields Container (Step 1) */}
+      <AnimatePresence mode="wait">
+        {step === 1 && (
+          <motion.div 
+            key="step1"
+            className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 relative"
+            variants={container}
+            initial="hidden"
+            animate="show"
+            exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+          >
+            <InputField icon={BookOpen} label="Attendance (%)" color="bg-emerald-500">
+              <input type="number" name="attendance" min="0" max="100" value={formData.attendance} onChange={handleChange} required disabled={isLoading} className={inputBase} />
+            </InputField>
 
-        <InputField icon={Trophy} label="Internal Average (0-20)" color="bg-indigo-500">
-          <input type="number" name="internal_avg" min="0" max="20" step="0.1" value={formData.internal_avg} onChange={handleChange} required disabled={isLoading} className={inputBase} />
-        </InputField>
+            <InputField icon={Trophy} label="Internal Average (0-20)" color="bg-indigo-500">
+              <input type="number" name="internal_avg" min="0" max="20" step="0.1" value={formData.internal_avg} onChange={handleChange} required disabled={isLoading} className={inputBase} />
+            </InputField>
 
-        <InputField icon={Clock} label="Study Time" color="bg-sky-500">
-          <select name="studytime" value={formData.studytime} onChange={handleChange} required disabled={isLoading} className={selectBase}>
-            <option value="1">1: &lt;2 hours</option>
-            <option value="2">2: 2 to 5 hours</option>
-            <option value="3">3: 5 to 10 hours</option>
-            <option value="4">4: &gt;10 hours</option>
-          </select>
-        </InputField>
+            <InputField icon={AlertTriangle} label="Past Failures (0-3)" color="bg-rose-500">
+              <input type="number" name="backlogs" min="0" max="3" value={formData.backlogs} onChange={handleChange} required disabled={isLoading} className={inputBase} />
+            </InputField>
+          </motion.div>
+        )}
 
-        <InputField icon={AlertTriangle} label="Past Failures (0-3)" color="bg-rose-500">
-          <input type="number" name="backlogs" min="0" max="3" value={formData.backlogs} onChange={handleChange} required disabled={isLoading} className={inputBase} />
-        </InputField>
+        {/* Fields Container (Step 2) */}
+        {step === 2 && (
+          <motion.div 
+            key="step2"
+            className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 relative"
+            variants={container}
+            initial={{ opacity: 0, x: 20 }}
+            animate="show"
+            exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+          >
+            <InputField icon={Clock} label="Study Time" color="bg-sky-500">
+              <select name="studytime" value={formData.studytime} onChange={handleChange} required disabled={isLoading} className={selectBase}>
+                <option value="1">1: &lt;2 hours</option>
+                <option value="2">2: 2 to 5 hours</option>
+                <option value="3">3: 5 to 10 hours</option>
+                <option value="4">4: &gt;10 hours</option>
+              </select>
+            </InputField>
 
-        <InputField icon={HeartHandshake} label="Extra Ed Support" color="bg-amber-500">
-          <select name="schoolsup" value={formData.schoolsup} onChange={handleChange} disabled={isLoading} className={selectBase}>
-            <option value="1">Yes</option>
-            <option value="0">No</option>
-          </select>
-        </InputField>
+            <InputField icon={HeartHandshake} label="Extra Ed Support" color="bg-amber-500">
+              <select name="schoolsup" value={formData.schoolsup} onChange={handleChange} disabled={isLoading} className={selectBase}>
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            </InputField>
 
-        <InputField icon={Sparkles} label="Extracurriculars" color="bg-purple-500">
-          <select name="activities" value={formData.activities} onChange={handleChange} disabled={isLoading} className={selectBase}>
-            <option value="1">Yes</option>
-            <option value="0">No</option>
-          </select>
-        </InputField>
+            <InputField icon={Sparkles} label="Extracurriculars" color="bg-purple-500">
+              <select name="activities" value={formData.activities} onChange={handleChange} disabled={isLoading} className={selectBase}>
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            </InputField>
 
-        <InputField icon={GraduationCap} label="Wants Higher Ed" color="bg-cyan-500">
-          <select name="higher" value={formData.higher} onChange={handleChange} disabled={isLoading} className={selectBase}>
-            <option value="1">Yes</option>
-            <option value="0">No</option>
-          </select>
-        </InputField>
-      </motion.div>
+            <InputField icon={GraduationCap} label="Wants Higher Ed" color="bg-cyan-500">
+              <select name="higher" value={formData.higher} onChange={handleChange} disabled={isLoading} className={selectBase}>
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            </InputField>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Buttons */}
       <motion.div 
         className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-100 dark:border-slate-800 relative"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
+        transition={{ delay: 0.3 }}
       >
-        <motion.button 
-          type="button" 
-          onClick={handleReset}
-          disabled={isLoading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white transition-all disabled:opacity-40 text-sm flex items-center justify-center gap-2 backdrop-blur-sm"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Reset
-        </motion.button>
+        {step === 1 ? (
+          <>
+            <motion.button 
+              type="button" 
+              onClick={handleReset}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white transition-all text-sm flex items-center justify-center gap-2 backdrop-blur-sm"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset
+            </motion.button>
 
-        <motion.button 
-          type="button" 
-          onClick={handleSampleData}
-          disabled={isLoading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white transition-all disabled:opacity-40 text-sm flex items-center justify-center gap-2 backdrop-blur-sm"
-        >
-          <Wand2 className="w-4 h-4" />
-          Auto-fill
-        </motion.button>
+            <motion.button 
+              type="button" 
+              onClick={handleSampleData}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white transition-all text-sm flex items-center justify-center gap-2 backdrop-blur-sm"
+            >
+              <Wand2 className="w-4 h-4" />
+              Auto-fill
+            </motion.button>
 
-        <motion.button 
-          type="submit" 
-          disabled={isLoading} 
-          whileHover={{ scale: 1.03, boxShadow: "0 8px 30px rgba(14, 165, 233, 0.35)" }}
-          whileTap={{ scale: 0.97 }}
-          className="flex-[2] py-3 px-6 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-sky-500/25 transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm relative overflow-hidden group"
-        >
-          {isLoading ? (
-            <>
-              <span className="loader scale-75"></span> Analyzing...
-            </>
-          ) : (
-            <>
-              Predict Performance
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </>
-          )}
-        </motion.button>
+            <motion.button 
+              type="submit" 
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex-[2] py-3 px-6 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-sky-500/25 transition-all flex items-center justify-center gap-2 text-sm"
+            >
+              Continue to Step 2
+              <ArrowRight className="w-4 h-4" />
+            </motion.button>
+          </>
+        ) : (
+          <>
+            <motion.button 
+              type="button" 
+              onClick={() => setStep(1)}
+              disabled={isLoading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white transition-all disabled:opacity-40 text-sm flex items-center justify-center gap-2 backdrop-blur-sm"
+            >
+              Back
+            </motion.button>
+
+            <motion.button 
+              type="submit" 
+              disabled={isLoading} 
+              whileHover={{ scale: 1.03, boxShadow: "0 8px 30px rgba(14, 165, 233, 0.35)" }}
+              whileTap={{ scale: 0.97 }}
+              className="flex-[2] py-3 px-6 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-sky-500/25 transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm relative overflow-hidden group"
+            >
+              {isLoading ? (
+                <>
+                  <span className="loader scale-75"></span> Analyzing Data...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Predict Performance
+                </>
+              )}
+            </motion.button>
+          </>
+        )}
       </motion.div>
     </motion.form>
   )

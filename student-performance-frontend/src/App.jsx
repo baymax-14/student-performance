@@ -14,6 +14,7 @@ import SettingsPage from './components/pages/SettingsPage'
 import HelpPage from './components/pages/HelpPage'
 import StudentsDirectoryPage from './components/pages/StudentsDirectoryPage'
 import { Sun, Moon, Bell, User, LogOut, X } from 'lucide-react'
+import { Toaster } from 'react-hot-toast'
 
 function App() {
   const [loading, setLoading] = useState(false)
@@ -170,6 +171,16 @@ function App() {
 
   return (
     <div className={`flex min-h-screen w-full transition-colors duration-500 ${isDark ? 'dark bg-slate-950 text-slate-50' : 'bg-slate-50 text-slate-900'}`}>
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: {
+            background: isDark ? '#1e293b' : '#fff',
+            color: isDark ? '#f8fafc' : '#0f172a',
+            border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+          }
+        }} 
+      />
       <div className="flex w-full relative">
 
         <div className={`z-10 shadow-lg border-r ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-[1px_0_10px_rgba(0,0,0,0.05)]'}`}>
