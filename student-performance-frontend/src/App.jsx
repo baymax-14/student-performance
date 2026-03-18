@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import PredictionForm from './components/PredictionForm'
 import ResultDisplay from './components/ResultDisplay'
 import PredictionHistory from './components/PredictionHistory'
@@ -13,7 +14,7 @@ import PerformancePage from './components/pages/PerformancePage'
 import SettingsPage from './components/pages/SettingsPage'
 import HelpPage from './components/pages/HelpPage'
 import StudentsDirectoryPage from './components/pages/StudentsDirectoryPage'
-import { Sun, Moon, Bell, User, LogOut, X } from 'lucide-react'
+import { Sun, Moon, Bell, User, LogOut, X, Menu } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -183,8 +184,34 @@ function App() {
       />
       <div className="flex w-full relative">
 
-        <div className={`z-10 shadow-lg border-r ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-[1px_0_10px_rgba(0,0,0,0.05)]'}`}>
-          <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} selected={activePage} setSelected={setActivePage} />
+        {/* Mobile hamburger button - visible only on small screens */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg"
+        >
+          <Menu className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+        </button>
+
+        {/* Sidebar backdrop overlay for mobile */}
+        {sidebarOpen && (
+          <div 
+            className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        <div className={`
+          z-40 shadow-lg border-r
+          ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-[1px_0_10px_rgba(0,0,0,0.05)]'}
+          md:relative md:block
+          fixed inset-y-0 left-0 transition-transform duration-300
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}>
+          <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} selected={activePage} setSelected={(page) => {
+            setActivePage(page);
+            // Auto-close sidebar on mobile after selecting a page
+            if (window.innerWidth < 768) setSidebarOpen(false);
+          }} />
         </div>
         
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full p-6 md:p-10 z-10">
@@ -280,8 +307,18 @@ function App() {
             </div>
           </div>
         
-          {/* Page Content */}
-          {renderPage()}
+          {/* Page Content with Animated Transitions */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activePage + (result ? '-result' : '')}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+            >
+              {renderPage()}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

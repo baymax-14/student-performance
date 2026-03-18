@@ -329,6 +329,74 @@ const StudentModal = ({ student, onClose, onUpdateStudent }) => {
                       )}
                     </div>
                   </div>
+
+                  {/* Score Breakdown Donut */}
+                  <div className="mt-5 bg-white dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-700/50">
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Score Breakdown</p>
+                    <div className="flex items-center gap-6">
+                      <div className="relative shrink-0">
+                        <svg width="90" height="90" className="transform -rotate-90">
+                          {(() => {
+                            const breakdownRadius = 32;
+                            const breakdownCirc = 2 * Math.PI * breakdownRadius;
+                            const segments = [
+                              { score: certScore, max: 30, color: "stroke-emerald-500" },
+                              { score: internScore, max: 25, color: "stroke-sky-500" },
+                              { score: projScore, max: 20, color: "stroke-purple-500" },
+                              { score: cgpaScore, max: 25, color: "stroke-amber-500" },
+                            ];
+                            let offset = 0;
+                            return segments.map((seg, i) => {
+                              const segLength = (seg.max / 100) * breakdownCirc;
+                              const filledLength = (seg.score / seg.max) * segLength;
+                              const el = (
+                                <g key={i}>
+                                  <circle
+                                    cx="45" cy="45" r={breakdownRadius}
+                                    className="stroke-slate-100 dark:stroke-slate-700"
+                                    strokeWidth="7" fill="none"
+                                    strokeDasharray={`${segLength} ${breakdownCirc - segLength}`}
+                                    strokeDashoffset={-offset}
+                                  />
+                                  <motion.circle
+                                    cx="45" cy="45" r={breakdownRadius}
+                                    className={seg.color}
+                                    strokeWidth="7" fill="none" strokeLinecap="round"
+                                    strokeDasharray={`${filledLength} ${breakdownCirc - filledLength}`}
+                                    strokeDashoffset={-offset}
+                                    initial={{ strokeDasharray: `0 ${breakdownCirc}` }}
+                                    animate={{ strokeDasharray: `${filledLength} ${breakdownCirc - filledLength}` }}
+                                    transition={{ duration: 1.2, delay: 0.2 + i * 0.15, ease: "easeOut" }}
+                                  />
+                                </g>
+                              );
+                              offset += segLength;
+                              return el;
+                            });
+                          })()}
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{totalScore}%</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 flex-1">
+                        {[
+                          { label: "Certifications", score: Math.round(certScore), max: 30, color: "bg-emerald-500" },
+                          { label: "Internships", score: Math.round(internScore), max: 25, color: "bg-sky-500" },
+                          { label: "Projects", score: Math.round(projScore), max: 20, color: "bg-purple-500" },
+                          { label: "CGPA", score: Math.round(cgpaScore), max: 25, color: "bg-amber-500" },
+                        ].map(item => (
+                          <div key={item.label} className="flex items-center gap-2">
+                            <div className={`w-2.5 h-2.5 rounded-full ${item.color} shrink-0`} />
+                            <div>
+                              <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{item.label}</p>
+                              <p className="text-xs font-bold text-slate-800 dark:text-white">{item.score}/{item.max}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StudentModal from '../StudentModal';
+import SkeletonCard from '../SkeletonCard';
 import {
   Search,
   GraduationCap,
@@ -157,6 +158,13 @@ const StudentsDirectoryPage = () => {
   
   const [allStudents, setAllStudents] = useState(getInitialDirectory);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Brief skeleton delay for smooth perceived loading
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('studentDirectoryData', JSON.stringify(allStudents));
@@ -298,6 +306,9 @@ const StudentsDirectoryPage = () => {
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {isLoading ? (
+          Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
+        ) : (
         <AnimatePresence>
           {filteredStudents.length === 0 ? (
             <div className="col-span-full py-12 text-center text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800">
@@ -374,6 +385,7 @@ const StudentsDirectoryPage = () => {
             ))
           )}
         </AnimatePresence>
+        )}
       </div>
 
       {/* Pagination Load More */}
