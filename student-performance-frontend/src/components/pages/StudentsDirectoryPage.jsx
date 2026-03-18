@@ -28,6 +28,14 @@ const SKILLS_BY_BRANCH = {
   "Civil": ["AutoCAD", "STAAD Pro", "Revit", "Surveying", "Structural Analysis", "Project Management", "Construction Planning", "ETABS", "GIS"]
 };
 
+const CERTS_BY_BRANCH = {
+  "CSE": ["AWS Cloud Practitioner", "Google Cloud Associate", "Meta Front-End Developer", "IBM AI Engineering", "HackerRank Problem Solving (Gold)"],
+  "IT": ["CompTIA Security+", "Cisco CCNA", "AWS Solutions Architect", "Google Data Analytics", "Microsoft Azure Fundamentals"],
+  "EXTC": ["IoT Architect Certification", "NVIDIA Deep Learning Institute", "Cisco CCNP", "LabVIEW Certified Associate"],
+  "Mechanical": ["SolidWorks Professional (CSWP)", "AutoCAD Certified User", "Six Sigma Green Belt", "Autodesk Inventor Certified"],
+  "Civil": ["Autodesk Civil 3D Certified", "LEED Green Associate", "Primavera P6 Certification", "STAAD Pro Professional"]
+};
+
 // Generate exactly 70 students per branch
 const generateStudents = () => {
   const students = [];
@@ -53,6 +61,11 @@ const generateStudents = () => {
       const shuffledSkills = [...branchSkills].sort(() => 0.5 - Math.random());
       const studentSkills = shuffledSkills.slice(0, Math.floor(Math.random() * 4) + 3);
 
+      const branchCerts = CERTS_BY_BRANCH[branch];
+      // Randomly select 0-2 certifications
+      const shuffledCerts = [...branchCerts].sort(() => 0.5 - Math.random());
+      const studentCerts = shuffledCerts.slice(0, Math.floor(Math.random() * 3));
+
       students.push({
         id: idCounter++,
         name: `${firstName} ${lastName}`,
@@ -63,6 +76,7 @@ const generateStudents = () => {
         projects: Math.floor(Math.random() * 5 + 1), // 1 to 5
         internships: Math.floor(Math.random() * 3), // 0 to 2
         skills: studentSkills,
+        certifications: studentCerts,
         email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${randomNum.toString().substring(0,2)}@edu.in`,
         location: ["Mumbai", "Pune", "Bangalore", "Delhi", "Hyderabad"][Math.floor(Math.random() * 5)]
       });
@@ -292,9 +306,25 @@ const StudentsDirectoryPage = () => {
                       </div>
                     </div>
 
+                    {selectedStudent.certifications && selectedStudent.certifications.length > 0 && (
+                      <div>
+                        <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">
+                          <Award className="w-4 h-4 text-amber-500" />
+                          Certifications
+                        </h4>
+                        <ul className="space-y-2">
+                          {selectedStudent.certifications.map(cert => (
+                            <li key={cert} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                              <span className="text-amber-500 mt-0.5">✦</span> {cert}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
                     <div>
                       <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">
-                        <Award className="w-4 h-4 text-emerald-500" />
+                        <BookOpen className="w-4 h-4 text-emerald-500" />
                         Key Highlights
                       </h4>
                       <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
