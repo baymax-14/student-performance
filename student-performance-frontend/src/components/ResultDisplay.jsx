@@ -328,9 +328,9 @@ export default function ResultDisplay({ result, onReset }) {
     { 
       name: "Internal Assessment", 
       currentScore: formData.internal_avg, 
-      unit: "%",
-      impactInfo: formData.internal_avg >= 60 ? "POSITIVE" : "NEGATIVE",
-      trend: formData.internal_avg >= 60 ? "up" : "down", 
+      unit: "/20",
+      impactInfo: formData.internal_avg >= 12 ? "POSITIVE" : "NEGATIVE",
+      trend: formData.internal_avg >= 12 ? "up" : "down", 
       confidence: Math.round((feature_importance?.internal_avg || 0.35) * 100) 
     },
     { 
@@ -382,7 +382,7 @@ export default function ResultDisplay({ result, onReset }) {
               Performance Forecast Ready
             </h1>
             <p className="text-muted-foreground text-sm">
-              AI analysis complete for {formData.name}
+              AI analysis complete — {performance}
             </p>
           </div>
           <div className="flex gap-3">
@@ -412,9 +412,8 @@ export default function ResultDisplay({ result, onReset }) {
                     </h2>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
                       Status: <span className={
-                        performance === 'Excellent' ? 'text-emerald-500' :
-                        performance === 'Good' ? 'text-sky-500' :
-                        performance === 'Average' ? 'text-amber-500' : 'text-rose-500'
+                        performance === 'Good Performance' ? 'text-emerald-500' :
+                        performance === 'Average Performance' ? 'text-amber-500' : 'text-rose-500'
                       }>{performance}</span>
                     </p>
                   </div>
@@ -479,7 +478,7 @@ export default function ResultDisplay({ result, onReset }) {
                   <h3 className="font-semibold text-foreground">Internal Avg</h3>
                 </div>
                 <div className="text-3xl font-bold text-foreground mb-2">
-                  <AnimatedValue value={formData.internal_avg} postfix="%" />
+                  <AnimatedValue value={formData.internal_avg} postfix="/20" />
                 </div>
                 <p className="text-sm text-muted-foreground">Based on recent tests</p>
               </CardContent>
@@ -524,7 +523,7 @@ export default function ResultDisplay({ result, onReset }) {
                   )}
                   {formData.studytime < 3 && (
                     <div className="bg-white/50 dark:bg-slate-900/50 p-3 rounded-lg border border-amber-200 dark:border-amber-500/20">
-                      <strong>Increase Study Hours:</strong> {formData.studytime} hours/week is below average. Aim for 4-5 hours to significantly raise confidence in your final exam.
+                      <strong>Increase Study Hours:</strong> Your current study level ({formData.studytime === 1 ? 'under 2 hours' : '2–5 hours'}/week) is below the recommended range. Aim for 5–10 hours weekly (level 3+) to significantly raise your predicted score.
                     </div>
                   )}
                   {formData.backlogs > 0 && (
