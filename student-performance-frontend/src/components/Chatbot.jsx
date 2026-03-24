@@ -83,7 +83,7 @@ Rules:
         console.error("Grok API Error Response:", errText);
         let errData;
         try { errData = JSON.parse(errText); } catch(e) {}
-        throw new Error(errData?.error?.message || \`API Error: \${response.status}\`);
+        throw new Error(errData?.error?.message || `API Error: ${response.status}`);
       }
 
       const data = await response.json();
