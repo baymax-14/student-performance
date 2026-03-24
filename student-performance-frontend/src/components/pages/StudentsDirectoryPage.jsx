@@ -94,7 +94,7 @@ const generateStudents = () => {
   const keshav = {
     id: 999999,
     name: "Keshav Raypure",
-    enrollment: "23BTIT1021",
+    enrollment: "23BTIT1025",
     branch: "IT",
     cgpa: 9.25,
     attendance: 95,

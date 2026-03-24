@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduPredict — Project Walkthrough</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --primary: #0ea5e9;
+      --primary-dark: #0284c7;
+      --accent: #6366f1;
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    @page {
+      size: A4;
+      margin: 18mm 16mm;
+    }
+
+    @media print {
+      body { font-size: 11px; }
+      .page-break { page-break-before: always; }
+      .no-break { page-break-inside: avoid; }
+      .hero { padding: 30px 40px !important; }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+      color: white;
+      padding: 50px 60px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .hero h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .hero .subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+    .hero .badge {
+      display: inline-block;
+      margin-top: 16px;
+      background: rgba(255,255,255,0.2);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Sections */
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2 .emoji { font-size: 22px; }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 20px 0 10px;
+    }
+
+    p { margin-bottom: 10px; color: var(--text); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 20px;
+      font-size: 12.5px;
+    }
+    thead th {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    tbody td {
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tbody tr:nth-child(even) { background: var(--surface); }
+
+    /* Code */
+    code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12px;
+      color: #be185d;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 16px 20px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 12px 0 18px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* Cards */
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 14px 0;
+      background: var(--surface);
+    }
+    .card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--primary-dark);
+    }
+
+    /* Feature grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 14px 0;
+    }
+    .feature-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      background: white;
+    }
+    .feature-card .icon { font-size: 20px; margin-bottom: 6px; }
+    .feature-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .feature-card p { font-size: 12px; color: var(--text-muted); margin: 0; }
+
+    /* File tree */
+    .file-tree {
+      background: #1e293b;
+      color: #94a3b8;
+      padding: 18px 22px;
+      border-radius: 10px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 11.5px;
+      line-height: 1.8;
+      margin: 12px 0 20px;
+      white-space: pre;
+    }
+    .file-tree .dir { color: #38bdf8; font-weight: 600; }
+    .file-tree .file { color: #e2e8f0; }
+    .file-tree .comment { color: #64748b; }
+
+    /* Architecture diagram box */
+    .arch-box {
+      background: linear-gradient(135deg, #f0f9ff, #eff6ff);
+      border: 1px solid #bae6fd;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 14px 0;
+      text-align: center;
+    }
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .arch-node {
+      background: white;
+      border: 2px solid var(--primary);
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-weight: 700;
+      font-size: 12px;
+      min-width: 110px;
+      text-align: center;
+    }
+    .arch-node small { display: block; font-weight: 400; color: var(--text-muted); margin-top: 2px; font-size: 10px; }
+    .arch-arrow { font-size: 18px; color: var(--primary); font-weight: 700; }
+
+    /* JSON block */
+    .json-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin: 12px 0 18px;
+      font-family: 'Consolas', monospace;
+      font-size: 11.5px;
+      line-height: 1.7;
+    }
+    .json-key { color: #38bdf8; }
+    .json-string { color: #a5f3fc; }
+    .json-number { color: #fbbf24; }
+
+    /* Summary box */
+    .summary-box {
+      background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin: 30px 0;
+    }
+    .summary-box h3 { color: white; margin-top: 0; }
+    .summary-box table { border: none; }
+    .summary-box th { background: rgba(255,255,255,0.15); color: white; border-color: rgba(255,255,255,0.2); }
+    .summary-box td { border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.95); }
+    .summary-box tr:nth-child(even) { background: rgba(255,255,255,0.05); }
+
+    .footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 11px;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+
+    ul, ol {
+      margin: 8px 0 14px 20px;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>🎓 EduPredict</h1>
+  <div class="subtitle">Student Performance Prediction System</div>
+  <div class="badge">Complete Project Walkthrough</div>
+</div>
+
+<div class="container">
+
+<!-- PROJECT STRUCTURE -->
+<h2><span class="emoji">📦</span> Project Structure</h2>
+
+<div class="file-tree"><span class="dir">student performance/</span>
+├── <span class="file">student-mat.csv</span>                      <span class="comment"># UCI dataset (395 students)</span>
+├── <span class="file">student_performance_model.py</span>         <span class="comment"># Base ML training script</span>
+├── <span class="file">student_performance_tuned_model.py</span>   <span class="comment"># Hyperparameter-tuned script</span>
+├── <span class="file">architecture.md</span>                      <span class="comment"># Architecture diagrams</span>
+├── <span class="dir">student-performance-api/</span>             <span class="comment"># Flask REST API (Backend)</span>
+│   ├── <span class="file">app.py</span>                           <span class="comment"># API server</span>
+│   ├── <span class="file">final_student_model.pkl</span>          <span class="comment"># Serialized best model (~3.3 MB)</span>
+│   ├── <span class="file">scaler.pkl</span>                       <span class="comment"># StandardScaler</span>
+│   └── <span class="file">requirements.txt</span>
+└── <span class="dir">student-performance-frontend/</span>        <span class="comment"># React + Vite (Frontend)</span>
+    ├── <span class="dir">src/</span>
+    │   ├── <span class="file">App.jsx</span>                      <span class="comment"># Root app — routing, auth, layout</span>
+    │   ├── <span class="file">index.css</span>                    <span class="comment"># Global styles + TailwindCSS</span>
+    │   ├── <span class="dir">components/</span>                  <span class="comment"># 12+ React components</span>
+    │   │   ├── <span class="file">Sidebar.jsx</span>              <span class="comment"># Collapsible sidebar nav</span>
+    │   │   ├── <span class="file">PredictionForm.jsx</span>       <span class="comment"># 2-step input wizard</span>
+    │   │   ├── <span class="file">ResultDisplay.jsx</span>        <span class="comment"># Rich prediction results</span>
+    │   │   ├── <span class="file">StudentModal.jsx</span>         <span class="comment"># Student profile modal</span>
+    │   │   ├── <span class="file">StudentRadarChart.jsx</span>    <span class="comment"># Radar chart visualization</span>
+    │   │   ├── <span class="dir">pages/</span>                   <span class="comment"># 8 page-level components</span>
+    │   │   └── <span class="dir">ui/</span>                      <span class="comment"># Reusable UI primitives</span>
+    │   └── <span class="dir">lib/</span>
+    └── <span class="file">package.json</span></div>
+
+<!-- TECH STACK -->
+<h2><span class="emoji">🛠️</span> Languages & Tech Stack</h2>
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>Technology</th><th>Version / Details</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Machine Learning</strong></td><td>Python, scikit-learn, XGBoost</td><td>Random Forest + XGBoost with GridSearchCV</td></tr>
+    <tr><td><strong>Backend API</strong></td><td>Python, Flask, Flask-CORS</td><td>REST API with <code>/predict</code> endpoint</td></tr>
+    <tr><td><strong>Model Serialization</strong></td><td>Joblib</td><td><code>.pkl</code> files for model + scaler</td></tr>
+    <tr><td><strong>Frontend Framework</strong></td><td>React</td><td>v19.2</td></tr>
+    <tr><td><strong>Build Tool</strong></td><td>Vite</td><td>v7.3</td></tr>
+    <tr><td><strong>Styling</strong></td><td>TailwindCSS</td><td>v4.2</td></tr>
+    <tr><td><strong>Animations</strong></td><td>Framer Motion</td><td>v12.35</td></tr>
+    <tr><td><strong>Charts</strong></td><td>Chart.js + react-chartjs-2</td><td>v4.5</td></tr>
+    <tr><td><strong>Icons</strong></td><td>Lucide React</td><td>v0.577</td></tr>
+    <tr><td><strong>Notifications</strong></td><td>react-hot-toast</td><td>v2.6</td></tr>
+    <tr><td><strong>Utilities</strong></td><td>clsx, tailwind-merge</td><td>CSS class merging</td></tr>
+    <tr><td><strong>Dataset</strong></td><td>UCI Student Performance</td><td><code>student-mat.csv</code> (Mathematics)</td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ML PIPELINE -->
+<h2><span class="emoji">🧠</span> Machine Learning Pipeline</h2>
+
+<h3>Dataset</h3>
+<div class="card no-break">
+  <h4>UCI Student Performance Data</h4>
+  <p><strong>Source:</strong> UCI Machine Learning Repository — Student Performance (Mathematics course)</p>
+  <p><strong>Records:</strong> 395 students &nbsp;|&nbsp; <strong>Target:</strong> Final grade <code>G3</code> mapped to 3 classes:</p>
+  <ul>
+    <li><strong>Class 0 — Poor</strong> (G3 &lt; 10)</li>
+    <li><strong>Class 1 — Average</strong> (10 ≤ G3 &lt; 14)</li>
+    <li><strong>Class 2 — Good</strong> (G3 ≥ 14)</li>
+  </ul>
+</div>
+
+<h3>Features Used (7 total)</h3>
+<table>
+  <thead>
+    <tr><th>Feature</th><th>Description</th><th>Type</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>attendance</code></td><td><code>100 - absences</code> (engineered)</td><td>Numeric</td></tr>
+    <tr><td><code>internal_avg</code></td><td><code>(G1 + G2) / 2</code> (engineered)</td><td>Numeric</td></tr>
+    <tr><td><code>studytime</code></td><td>Weekly study time (1–4 scale)</td><td>Numeric</td></tr>
+    <tr><td><code>backlogs</code></td><td>Number of past class failures</td><td>Numeric</td></tr>
+    <tr><td><code>schoolsup</code></td><td>Extra educational support</td><td>Categorical → 0/1</td></tr>
+    <tr><td><code>activities</code></td><td>Extracurricular activities</td><td>Categorical → 0/1</td></tr>
+    <tr><td><code>higher</code></td><td>Wants to pursue higher education</td><td>Categorical → 0/1</td></tr>
+  </tbody>
+</table>
+
+<h3>Training Scripts</h3>
+
+<div class="card no-break">
+  <h4>1. student_performance_model.py — Base Model</h4>
+  <ul>
+    <li>Trains both <strong>Random Forest</strong> (300 trees, max_depth=12) and <strong>XGBoost</strong> (300 trees, lr=0.05)</li>
+    <li>80/20 stratified split + StandardScaler normalization</li>
+    <li>Evaluates with accuracy, F1-score, 5-fold cross-validation</li>
+    <li>Auto-saves the best-performing model</li>
+  </ul>
+</div>
+
+<div class="card no-break">
+  <h4>2. student_performance_tuned_model.py — Tuned Model</h4>
+  <ul>
+    <li>Adds <strong>GridSearchCV</strong> hyperparameter tuning for both models</li>
+    <li>RF grid: <code>n_estimators</code> ∈ {200, 300, 400}, <code>max_depth</code> ∈ {8, 12, 16}, <code>min_samples_split</code>, <code>min_samples_leaf</code></li>
+    <li>XGBoost grid: <code>n_estimators</code>, <code>learning_rate</code>, <code>max_depth</code>, <code>subsample</code>, <code>colsample_bytree</code></li>
+    <li>5-fold CV with <code>f1_weighted</code> scoring</li>
+    <li>Saves final champion model as <code>final_student_model.pkl</code></li>
+  </ul>
+</div>
+
+<div class="page-break"></div>
+
+<!-- BACKEND API -->
+<h2><span class="emoji">🔌</span> Backend API</h2>
+
+<h3>Routes</h3>
+<table>
+  <thead>
+    <tr><th>Route</th><th>Method</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>/</code></td><td>GET</td><td>Health check — returns "API is running"</td></tr>
+    <tr><td><code>/predict</code></td><td>POST</td><td>Accepts student features as JSON, returns prediction</td></tr>
+  </tbody>
+</table>
+
+<h3>Sample API Response</h3>
+<div class="json-block">{
+  <span class="json-key">"prediction"</span>: <span class="json-number">2</span>,
+  <span class="json-key">"performance"</span>: <span class="json-string">"Good Performance"</span>,
+  <span class="json-key">"confidence"</span>: <span class="json-number">0.87</span>,
+  <span class="json-key">"feature_importance"</span>: {
+    <span class="json-key">"attendance"</span>: <span class="json-number">0.12</span>,
+    <span class="json-key">"internal_avg"</span>: <span class="json-number">0.45</span>,
+    <span class="json-key">"studytime"</span>: <span class="json-number">0.08</span>,
+    <span class="json-key">"backlogs"</span>: <span class="json-number">0.15</span>,
+    <span class="json-key">"schoolsup"</span>: <span class="json-number">0.03</span>,
+    <span class="json-key">"activities"</span>: <span class="json-number">0.05</span>,
+    <span class="json-key">"higher"</span>: <span class="json-number">0.12</span>
+  }
+}</div>
+
+<p><strong>Key details:</strong> Uses CORS for cross-origin requests. Loads model & scaler at startup. Scales input features before prediction. Returns class label, human-readable performance tier, confidence score (max probability), and per-feature importance scores.</p>
+
+<!-- ARCHITECTURE -->
+<h2><span class="emoji">🏗️</span> Architecture</h2>
+
+<div class="arch-box no-break">
+  <div class="arch-flow">
+    <div class="arch-node">🖥️ React Frontend<small>Vite + TailwindCSS</small></div>
+    <div class="arch-arrow">→ JSON POST →</div>
+    <div class="arch-node">⚙️ Flask REST API<small>Port 5000</small></div>
+    <div class="arch-arrow">→ Features →</div>
+    <div class="arch-node">🧠 ML Model<small>Random Forest</small></div>
+  </div>
+  <br>
+  <div class="arch-flow">
+    <div class="arch-node">🧠 ML Model<small>Random Forest</small></div>
+    <div class="arch-arrow">→ prediction, confidence, importance →</div>
+    <div class="arch-node">⚙️ Flask API</div>
+    <div class="arch-arrow">→ JSON →</div>
+    <div class="arch-node">🖥️ React UI</div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- FRONTEND -->
+<h2><span class="emoji">🎨</span> Frontend Application</h2>
+
+<p>The frontend is a single-page React application with client-side routing managed by a state variable. Protected behind a <strong>login gate</strong> — users authenticate before accessing the dashboard.</p>
+
+<h3>Key Features</h3>
+
+<div class="feature-grid">
+  <div class="feature-card no-break">
+    <div class="icon">🔐</div>
+    <h4>Authentication Gate</h4>
+    <p>Email-based login page with dark/light mode toggle. User session in state. Profile dropdown with sign-out.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">📊</div>
+    <h4>2-Step Prediction Wizard</h4>
+    <p>Step 1: Academic stats (attendance, avg, failures). Step 2: Study habits & support. Auto-fill & reset buttons.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">📈</div>
+    <h4>Rich Result Display</h4>
+    <p>Animated score counter, 3 metric cards, projected trajectory SVG chart, feature impact grid, AI advice panel.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">📋</div>
+    <h4>Prediction History</h4>
+    <p>Stored in localStorage (up to 20 entries). Notification bell in header. Dedicated browsing page.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">👨‍🎓</div>
+    <h4>Students Directory</h4>
+    <p>Full student listing with detailed profile modals and radar chart visualizations.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">🧭</div>
+    <h4>Responsive Navigation</h4>
+    <p>Collapsible sidebar (icon/label modes). Hamburger menu on mobile. Animated page transitions.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">🌙</div>
+    <h4>Dark / Light Mode</h4>
+    <p>Full theme toggle with smooth transitions. Applied globally via document class.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">✨</div>
+    <h4>Premium UI Polish</h4>
+    <p>Skeleton loaders, toast notifications, micro-animations, gradient orbs, glassmorphism, spring physics.</p>
+  </div>
+</div>
+
+<h3>All Pages</h3>
+<table>
+  <thead>
+    <tr><th>Page</th><th>Component</th><th>Purpose</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>🏠 Dashboard</td><td><code>App.jsx</code></td><td>Prediction form + results display</td></tr>
+    <tr><td>📊 Analytics</td><td><code>AnalyticsPage.jsx</code></td><td>Charts & statistical visualizations</td></tr>
+    <tr><td>👥 Students</td><td><code>StudentsDirectoryPage.jsx</code></td><td>Full student directory with modals</td></tr>
+    <tr><td>📋 Prediction History</td><td><code>StudentsPage.jsx</code></td><td>Browse past predictions</td></tr>
+    <tr><td>📈 Performance</td><td><code>PerformancePage.jsx</code></td><td>Performance metrics overview</td></tr>
+    <tr><td>🧠 AI Insights</td><td><code>InsightsPage.jsx</code></td><td>ML-powered insights</td></tr>
+    <tr><td>⚙️ Settings</td><td><code>SettingsPage.jsx</code></td><td>Theme & app configuration</td></tr>
+    <tr><td>❓ Help & Support</td><td><code>HelpPage.jsx</code></td><td>Documentation & support</td></tr>
+  </tbody>
+</table>
+
+<h3>Reusable UI Components</h3>
+<p>Located in <code>src/components/ui/</code>: <strong>Card</strong>, <strong>Badge</strong>, <strong>Button</strong>, <strong>Avatar</strong>, <strong>Tabs</strong>, <strong>Progress</strong>, <strong>Separator</strong></p>
+
+<div class="page-break"></div>
+
+<!-- HOW TO RUN -->
+<h2><span class="emoji">🚀</span> How to Run</h2>
+
+<div class="card no-break">
+  <h4>Backend</h4>
+  <pre><code>cd student-performance-api
+pip install flask flask-cors numpy joblib scikit-learn
+python app.py
+# → API running at http://localhost:5000</code></pre>
+</div>
+
+<div class="card no-break">
+  <h4>Frontend</h4>
+  <pre><code>cd student-performance-frontend
+npm install
+npm run dev
+# → App running at http://localhost:5173</code></pre>
+</div>
+
+<div class="card no-break">
+  <h4>Train a New Model (optional)</h4>
+  <pre><code>python student_performance_tuned_model.py
+# → Saves final_student_model.pkl + scaler.pkl</code></pre>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary-box no-break">
+  <h3>📌 Project Summary</h3>
+  <table>
+    <thead>
+      <tr><th>Aspect</th><th>Details</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Languages</strong></td><td>Python (ML + API), JavaScript/JSX (Frontend), CSS</td></tr>
+      <tr><td><strong>ML Models</strong></td><td>Random Forest, XGBoost (with hyperparameter tuning)</td></tr>
+      <tr><td><strong>Dataset</strong></td><td>UCI Student Performance (Mathematics), 395 records</td></tr>
+      <tr><td><strong>Backend</strong></td><td>Flask REST API with CORS</td></tr>
+      <tr><td><strong>Frontend</strong></td><td>React 19 + Vite + TailwindCSS v4</td></tr>
+      <tr><td><strong>Key Libraries</strong></td><td>scikit-learn, XGBoost, Framer Motion, Chart.js, Lucide</td></tr>
+      <tr><td><strong>Deployment</strong></td><td>API hosted on Render (student-performance-ve59.onrender.com)</td></tr>
+      <tr><td><strong>Pages</strong></td><td>8 pages: Dashboard, Analytics, Students, History, Performance, Insights, Settings, Help</td></tr>
+      <tr><td><strong>Authentication</strong></td><td>Email-based login gate</td></tr>
+      <tr><td><strong>Theme</strong></td><td>Dark/Light mode with animated transitions</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  EduPredict — Student Performance Prediction System &nbsp;|&nbsp; Project Walkthrough Document &nbsp;|&nbsp; Generated March 2026
+</div>
+
+</div>
+</body>
+</html>
