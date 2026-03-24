@@ -56,51 +56,60 @@ Rules:
     setIsLoading(true);
 
     try {
-      const apiKey = import.meta.env.VITE_XAI_API_KEY;
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) {
-        throw new Error("API Key missing. Please check your .env.local file.");
+        throw new Error("Gemini API Key missing. Please check your .env.local file.");
       }
 
-      const response = await fetch("https://api.x.ai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: "grok-3-mini-fast",
-          messages: [
-            { role: "system", content: generateSystemPrompt() },
-            ...messages.map(m => ({ role: m.role, content: m.content })),
-            userMessage
-          ],
-          temperature: 0.7
-        })
-      });
+      // Build conversation history in Gemini format
+      const systemPrompt = generateSystemPrompt();
+      const contents = [];
+
+      // Add all prior messages as conversation history
+      const allMsgs = [...messages, userMessage];
+      for (const msg of allMsgs) {
+        contents.push({
+          role: msg.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: msg.content }]
+        });
+      }
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: {
+              parts: [{ text: systemPrompt }]
+            },
+            contents
+          })
+        }
+      );
 
       if (!response.ok) {
         const errText = await response.text();
-        console.error("Grok API Error Response:", errText);
+        console.error("Gemini API Error:", errText);
         let errData;
         try { errData = JSON.parse(errText); } catch(e) {}
         throw new Error(errData?.error?.message || `API Error: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Grok API Response Data:", data);
+      console.log("Gemini Response:", data);
 
-      if (!data.choices || !data.choices[0]) {
-        throw new Error("Invalid response format from Grok: " + JSON.stringify(data));
+      if (!data.candidates || !data.candidates[0]) {
+        throw new Error("No response from Gemini: " + JSON.stringify(data));
       }
 
-      const botReply = data.choices[0].message.content;
-
+      const botReply = data.candidates[0].content.parts[0].text;
       setMessages(prev => [...prev, { role: 'assistant', content: botReply }]);
 
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Failed to connect to EduPredict AI");
-      setMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Sorry, I encountered a network error while trying to think. Please check the API setup." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Sorry, I encountered an error. Please check the API setup." }]);
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +144,7 @@ Rules:
                   <h3 className="text-white font-bold text-sm flex items-center gap-1">
                     EduPredict AI <Sparkles size={12} className="text-amber-300" />
                   </h3>
-                  <p className="text-sky-100 text-xs opacity-90">Powered by xAI Grok</p>
+                  <p className="text-sky-100 text-xs opacity-90">Powered by Google Gemini</p>
                 </div>
               </div>
               <button 
