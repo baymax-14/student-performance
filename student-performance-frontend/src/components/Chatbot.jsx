@@ -61,7 +61,7 @@ Rules:
         throw new Error("API Key missing. Please check your .env.local file.");
       }
 
-      const response = await fetch("https://api.xai.com/v1/chat/completions", {
+      const response = await fetch("https://api.x.ai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
