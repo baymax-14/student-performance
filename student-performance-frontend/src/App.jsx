@@ -14,6 +14,7 @@ import PerformancePage from './components/pages/PerformancePage'
 import SettingsPage from './components/pages/SettingsPage'
 import HelpPage from './components/pages/HelpPage'
 import StudentsDirectoryPage from './components/pages/StudentsDirectoryPage'
+import Chatbot from './components/Chatbot'
 import { Sun, Moon, Bell, User, LogOut, X, Menu } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 
@@ -321,6 +322,9 @@ function App() {
           </AnimatePresence>
         </main>
       </div>
+      
+      {/* Global Floating AI Chatbot */}
+      <Chatbot />
     </div>
   )
 }
