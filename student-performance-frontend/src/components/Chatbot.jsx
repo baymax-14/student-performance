@@ -79,11 +79,20 @@ Rules:
       });
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error?.message || "Failed to fetch from Grok API");
+        const errText = await response.text();
+        console.error("Grok API Error Response:", errText);
+        let errData;
+        try { errData = JSON.parse(errText); } catch(e) {}
+        throw new Error(errData?.error?.message || \`API Error: \${response.status}\`);
       }
 
       const data = await response.json();
+      console.log("Grok API Response Data:", data);
+
+      if (!data.choices || !data.choices[0]) {
+        throw new Error("Invalid response format from Grok: " + JSON.stringify(data));
+      }
+
       const botReply = data.choices[0].message.content;
 
       setMessages(prev => [...prev, { role: 'assistant', content: botReply }]);
