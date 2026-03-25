@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, X, Send, Loader2, Sparkles, MessageSquare } from 'lucide-react';
+import { Bot, X, Send, Loader2, Sparkles, MessageSquare, Maximize2, Minimize2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'assistant', content: "Hi! I'm EduPredict AI. I can analyze student profiles, give career roadmaps, or answer questions about job readiness. How can I help you today?" }
   ]);
@@ -56,54 +57,44 @@ Rules:
     setIsLoading(true);
 
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
       if (!apiKey) {
-        throw new Error("Gemini API Key missing. Please check your .env.local file.");
+        throw new Error("Groq API Key missing. Please check your .env.local file.");
       }
 
-      // Build conversation history in Gemini format
-      const systemPrompt = generateSystemPrompt();
-      const contents = [];
-
-      // Add all prior messages as conversation history
-      const allMsgs = [...messages, userMessage];
-      for (const msg of allMsgs) {
-        contents.push({
-          role: msg.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: msg.content }]
-        });
-      }
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: {
-              parts: [{ text: systemPrompt }]
-            },
-            contents
-          })
-        }
-      );
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: generateSystemPrompt() },
+            ...messages.map(m => ({ role: m.role, content: m.content })),
+            userMessage
+          ],
+          temperature: 0.7,
+        })
+      });
 
       if (!response.ok) {
         const errText = await response.text();
-        console.error("Gemini API Error:", errText);
+        console.error("Groq API Error:", errText);
         let errData;
         try { errData = JSON.parse(errText); } catch(e) {}
         throw new Error(errData?.error?.message || `API Error: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Gemini Response:", data);
+      console.log("Groq Response:", data);
 
-      if (!data.candidates || !data.candidates[0]) {
-        throw new Error("No response from Gemini: " + JSON.stringify(data));
+      if (!data.choices || !data.choices[0]) {
+        throw new Error("No response from Groq: " + JSON.stringify(data));
       }
 
-      const botReply = data.candidates[0].content.parts[0].text;
+      const botReply = data.choices[0].message.content;
       setMessages(prev => [...prev, { role: 'assistant', content: botReply }]);
 
     } catch (error) {
@@ -131,11 +122,14 @@ Rules:
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-16 right-0 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-            style={{ height: '500px', maxHeight: '80vh' }}
+            className={`absolute bottom-16 right-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out ${
+              isExpanded 
+                ? 'w-[90vw] sm:w-[60vw] md:w-[800px] h-[80vh] max-h-[900px]' 
+                : 'w-80 sm:w-96 h-[500px] max-h-[80vh]'
+            }`}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-sky-600 to-indigo-600 p-4 flex items-center justify-between shadow-md z-10">
+            <div className="bg-gradient-to-r from-sky-600 to-indigo-600 p-4 flex items-center justify-between shadow-md z-10 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30 text-white">
                   <Bot size={18} />
@@ -144,15 +138,25 @@ Rules:
                   <h3 className="text-white font-bold text-sm flex items-center gap-1">
                     EduPredict AI <Sparkles size={12} className="text-amber-300" />
                   </h3>
-                  <p className="text-sky-100 text-xs opacity-90">Powered by Google Gemini</p>
+                  <p className="text-sky-100 text-xs opacity-90">Powered by Groq</p>
                 </div>
               </div>
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="text-white/70 hover:text-white transition-colors p-1"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                  title={isExpanded ? "Minimize" : "Maximize"}
+                >
+                  {isExpanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                </button>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                  title="Close"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Chat Area */}
@@ -169,7 +173,13 @@ Rules:
                     {/* Basic markdown parsing for bold and spacing */}
                     {msg.content.split('\n').map((line, i) => {
                       if (line.startsWith('* ') || line.startsWith('- ')) {
-                         return <div key={i} className="ml-3 my-1 flex"><span className="mr-2">&bull;</span><span>{line.substring(2).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</span></div>
+                         const boldedLine = line.substring(2).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                         return (
+                           <div key={i} className="ml-3 my-1 flex">
+                             <span className="mr-2">&bull;</span>
+                             <span dangerouslySetInnerHTML={{ __html: boldedLine }} />
+                           </div>
+                         );
                       }
                       
                       let formatted = line.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
