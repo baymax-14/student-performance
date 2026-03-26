@@ -15,6 +15,7 @@ import SettingsPage from './components/pages/SettingsPage'
 import HelpPage from './components/pages/HelpPage'
 import StudentsDirectoryPage from './components/pages/StudentsDirectoryPage'
 import Chatbot from './components/Chatbot'
+import LoadingScreen from './components/LoadingScreen'
 import { Sun, Moon, Bell, User, LogOut, X, Menu } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 
@@ -38,6 +39,7 @@ function App() {
   // Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userEmail, setUserEmail] = useState('')
+  const [showLoadingScreen, setShowLoadingScreen] = useState(false)
 
   // Header dropdown state
   const [showNotifications, setShowNotifications] = useState(false)
@@ -67,6 +69,7 @@ function App() {
   const handleLogin = ({ email }) => {
     setUserEmail(email);
     setIsAuthenticated(true);
+    setShowLoadingScreen(true);
   };
 
   const handleLogout = () => {
@@ -74,6 +77,7 @@ function App() {
     setUserEmail('');
     setShowUserMenu(false);
     setActivePage('Dashboard');
+    setShowLoadingScreen(false);
   };
 
   const handlePredict = async (formData) => {
@@ -173,6 +177,11 @@ function App() {
 
   return (
     <div className={`flex min-h-screen w-full transition-colors duration-500 ${isDark ? 'dark bg-slate-950 text-slate-50' : 'bg-slate-50 text-slate-900'}`}>
+      <AnimatePresence>
+        {showLoadingScreen && (
+          <LoadingScreen onComplete={() => setShowLoadingScreen(false)} />
+        )}
+      </AnimatePresence>
       <Toaster 
         position="top-right" 
         toastOptions={{
