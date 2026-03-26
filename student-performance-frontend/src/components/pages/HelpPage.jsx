@@ -69,91 +69,98 @@ const HelpPage = () => {
       <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Help & Support</h2>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Everything you need to know about using the EduPredict dashboard.</p>
 
-      {/* Quick Start Guide */}
-      <div className="max-w-3xl mb-8">
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Quick Start Guide</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {quickLinks.map((link, idx) => (
-            <div
-              key={idx}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 hover:border-sky-300 dark:hover:border-sky-500/30 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-sm font-bold">
-                  {idx + 1}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{link.label}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{link.desc}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Two-column layout */}
+      <div className="flex flex-col lg:flex-row gap-6">
 
-      {/* FAQs */}
-      <div className="max-w-3xl mb-8">
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Frequently Asked Questions</h3>
-        <div className="space-y-3">
-          {faqs.map((faq, idx) => {
-            const isOpen = openIdx === idx;
-            return (
-              <div
-                key={idx}
-                className={`bg-white dark:bg-slate-900 border rounded-xl overflow-hidden transition-all duration-200 ${isOpen ? 'border-sky-300 dark:border-sky-500/30' : 'border-slate-200 dark:border-slate-800'}`}
-              >
-                <button
-                  onClick={() => setOpenIdx(isOpen ? -1 : idx)}
-                  className="w-full flex items-center gap-4 p-5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+        {/* Left Column — FAQs */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Frequently Asked Questions</h3>
+          <div className="space-y-3">
+            {faqs.map((faq, idx) => {
+              const isOpen = openIdx === idx;
+              return (
+                <div
+                  key={idx}
+                  className={`bg-white dark:bg-slate-900 border rounded-xl overflow-hidden transition-all duration-200 ${isOpen ? 'border-sky-300 dark:border-sky-500/30' : 'border-slate-200 dark:border-slate-800'}`}
                 >
-                  <div className={`p-2 rounded-lg ${isOpen ? 'bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
-                    <faq.icon className="w-4 h-4" />
-                  </div>
-                  <span className={`flex-1 text-sm font-semibold ${isOpen ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>{faq.q}</span>
-                  {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                  <button
+                    onClick={() => setOpenIdx(isOpen ? -1 : idx)}
+                    className="w-full flex items-center gap-4 p-5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                  >
+                    <div className={`p-2 rounded-lg ${isOpen ? 'bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
+                      <faq.icon className="w-4 h-4" />
+                    </div>
+                    <span className={`flex-1 text-sm font-semibold ${isOpen ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>{faq.q}</span>
+                    {isOpen ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                    )}
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 pl-16">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{faq.a}</p>
+                    </div>
                   )}
-                </button>
-                {isOpen && (
-                  <div className="px-5 pb-5 pl-16">
-                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{faq.a}</p>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Keyboard Tips */}
-      <div className="max-w-3xl mb-8">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Tips & Shortcuts</h3>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-start gap-3">
-              <span className="shrink-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono px-2 py-1 rounded">Enter</span>
-              <span className="text-slate-600 dark:text-slate-400">Send a message in the AI Chatbot</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="shrink-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono px-2 py-1 rounded">Sidebar</span>
-              <span className="text-slate-600 dark:text-slate-400">Collapse the sidebar using the chevron button at the bottom for more screen space</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="shrink-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono px-2 py-1 rounded">AI Chat</span>
-              <span className="text-slate-600 dark:text-slate-400">Click the expand icon to maximize the chatbot window for longer conversations</span>
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </div>
 
-      {/* Contact */}
-      <div className="max-w-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6">
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">Still need help?</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Contact the team for additional support, feature requests, or bug reports.</p>
-        <p className="text-sm text-sky-600 dark:text-sky-400 font-semibold">support@edupredict.example.com</p>
+        {/* Right Column — Sidebar widgets */}
+        <div className="lg:w-[340px] shrink-0 space-y-5 lg:sticky lg:top-6 lg:self-start">
+
+          {/* Quick Start Guide */}
+          <div>
+            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Quick Start Guide</h3>
+            <div className="grid grid-cols-1 gap-3">
+              {quickLinks.map((link, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 hover:border-sky-300 dark:hover:border-sky-500/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-sm font-bold">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{link.label}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{link.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tips & Shortcuts */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Tips & Shortcuts</h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-start gap-3">
+                <span className="shrink-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono px-2 py-1 rounded">Enter</span>
+                <span className="text-slate-600 dark:text-slate-400">Send a message in the AI Chatbot</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="shrink-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono px-2 py-1 rounded">Sidebar</span>
+                <span className="text-slate-600 dark:text-slate-400">Collapse sidebar with the chevron for more space</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="shrink-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono px-2 py-1 rounded">AI Chat</span>
+                <span className="text-slate-600 dark:text-slate-400">Expand the chatbot for longer conversations</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">Still need help?</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Contact us for support, feature requests, or bug reports.</p>
+            <p className="text-sm text-sky-600 dark:text-sky-400 font-semibold">support@edupredict.example.com</p>
+          </div>
+
+        </div>
       </div>
     </div>
   );
