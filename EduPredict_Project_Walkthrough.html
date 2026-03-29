@@ -272,6 +272,21 @@
     li {
       margin-bottom: 4px;
     }
+
+    /* New: highlight badge */
+    .new-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
   </style>
 </head>
 <body>
@@ -280,7 +295,7 @@
 <div class="hero">
   <h1>🎓 EduPredict</h1>
   <div class="subtitle">Student Performance Prediction System</div>
-  <div class="badge">Complete Project Walkthrough</div>
+  <div class="badge">Complete Project Walkthrough — Updated March 2026</div>
 </div>
 
 <div class="container">
@@ -293,24 +308,43 @@
 ├── <span class="file">student_performance_model.py</span>         <span class="comment"># Base ML training script</span>
 ├── <span class="file">student_performance_tuned_model.py</span>   <span class="comment"># Hyperparameter-tuned script</span>
 ├── <span class="file">architecture.md</span>                      <span class="comment"># Architecture diagrams</span>
+├── <span class="file">EduPredict_Project_Walkthrough.html</span>  <span class="comment"># This document</span>
 ├── <span class="dir">student-performance-api/</span>             <span class="comment"># Flask REST API (Backend)</span>
-│   ├── <span class="file">app.py</span>                           <span class="comment"># API server</span>
+│   ├── <span class="file">app.py</span>                           <span class="comment"># API server with /predict endpoint</span>
 │   ├── <span class="file">final_student_model.pkl</span>          <span class="comment"># Serialized best model (~3.3 MB)</span>
 │   ├── <span class="file">scaler.pkl</span>                       <span class="comment"># StandardScaler</span>
 │   └── <span class="file">requirements.txt</span>
 └── <span class="dir">student-performance-frontend/</span>        <span class="comment"># React + Vite (Frontend)</span>
     ├── <span class="dir">src/</span>
-    │   ├── <span class="file">App.jsx</span>                      <span class="comment"># Root app — routing, auth, layout</span>
-    │   ├── <span class="file">index.css</span>                    <span class="comment"># Global styles + TailwindCSS</span>
-    │   ├── <span class="dir">components/</span>                  <span class="comment"># 12+ React components</span>
-    │   │   ├── <span class="file">Sidebar.jsx</span>              <span class="comment"># Collapsible sidebar nav</span>
+    │   ├── <span class="file">App.jsx</span>                      <span class="comment"># Root — routing, auth, layout, loading</span>
+    │   ├── <span class="file">index.css</span>                    <span class="comment"># Global styles + TailwindCSS v4</span>
+    │   ├── <span class="file">main.jsx</span>                     <span class="comment"># React DOM entry point</span>
+    │   ├── <span class="dir">components/</span>                  <span class="comment"># 14 React components</span>
+    │   │   ├── <span class="file">Sidebar.jsx</span>              <span class="comment"># Collapsible sidebar navigation</span>
     │   │   ├── <span class="file">PredictionForm.jsx</span>       <span class="comment"># 2-step input wizard</span>
-    │   │   ├── <span class="file">ResultDisplay.jsx</span>        <span class="comment"># Rich prediction results</span>
-    │   │   ├── <span class="file">StudentModal.jsx</span>         <span class="comment"># Student profile modal</span>
+    │   │   ├── <span class="file">ResultDisplay.jsx</span>        <span class="comment"># Rich prediction results (24 KB)</span>
+    │   │   ├── <span class="file">StudentModal.jsx</span>         <span class="comment"># Full student profile modal (23 KB)</span>
     │   │   ├── <span class="file">StudentRadarChart.jsx</span>    <span class="comment"># Radar chart visualization</span>
+    │   │   ├── <span class="file">Chatbot.jsx</span>              <span class="comment"># Floating AI chatbot (Groq/LLaMA)</span>
+    │   │   ├── <span class="file">LoadingScreen.jsx</span>        <span class="comment"># Animated post-login loading screen</span>
+    │   │   ├── <span class="file">PredictionHistory.jsx</span>    <span class="comment"># Recent predictions sidebar card</span>
+    │   │   ├── <span class="file">ModelInfo.jsx</span>            <span class="comment"># ML model information card</span>
+    │   │   ├── <span class="file">FeatureImportanceChart.jsx</span> <span class="comment"># Feature importance bar chart</span>
+    │   │   ├── <span class="file">SkeletonCard.jsx</span>         <span class="comment"># Skeleton loading placeholders</span>
+    │   │   ├── <span class="file">AIInsights.jsx</span>           <span class="comment"># AI insights widget</span>
+    │   │   ├── <span class="file">Hero.jsx</span>                 <span class="comment"># Landing hero section</span>
+    │   │   ├── <span class="file">Footer.jsx</span>               <span class="comment"># App footer</span>
     │   │   ├── <span class="dir">pages/</span>                   <span class="comment"># 8 page-level components</span>
-    │   │   └── <span class="dir">ui/</span>                      <span class="comment"># Reusable UI primitives</span>
-    │   └── <span class="dir">lib/</span>
+    │   │   │   ├── <span class="file">LoginPage.jsx</span>        <span class="comment"># Split-screen login with social auth</span>
+    │   │   │   ├── <span class="file">AnalyticsPage.jsx</span>    <span class="comment"># Charts & statistics</span>
+    │   │   │   ├── <span class="file">StudentsDirectoryPage.jsx</span> <span class="comment"># 350+ student profiles (28 KB)</span>
+    │   │   │   ├── <span class="file">StudentsPage.jsx</span>     <span class="comment"># Prediction history browser</span>
+    │   │   │   ├── <span class="file">InsightsPage.jsx</span>     <span class="comment"># AI-powered insights dashboard</span>
+    │   │   │   ├── <span class="file">PerformancePage.jsx</span>  <span class="comment"># Performance metrics</span>
+    │   │   │   ├── <span class="file">SettingsPage.jsx</span>     <span class="comment"># Theme & app configuration</span>
+    │   │   │   └── <span class="file">HelpPage.jsx</span>         <span class="comment"># Documentation & support</span>
+    │   │   └── <span class="dir">ui/</span>                      <span class="comment"># 7 Reusable UI primitives</span>
+    │   └── <span class="dir">lib/</span>                         <span class="comment"># Utility functions (cn, clsx)</span>
     └── <span class="file">package.json</span></div>
 
 <!-- TECH STACK -->
@@ -328,9 +362,10 @@
     <tr><td><strong>Build Tool</strong></td><td>Vite</td><td>v7.3</td></tr>
     <tr><td><strong>Styling</strong></td><td>TailwindCSS</td><td>v4.2</td></tr>
     <tr><td><strong>Animations</strong></td><td>Framer Motion</td><td>v12.35</td></tr>
-    <tr><td><strong>Charts</strong></td><td>Chart.js + react-chartjs-2</td><td>v4.5</td></tr>
+    <tr><td><strong>Charts</strong></td><td>Chart.js + react-chartjs-2</td><td>v4.5 / v5.3</td></tr>
     <tr><td><strong>Icons</strong></td><td>Lucide React</td><td>v0.577</td></tr>
     <tr><td><strong>Notifications</strong></td><td>react-hot-toast</td><td>v2.6</td></tr>
+    <tr><td><strong>AI Chatbot</strong></td><td>Groq API + LLaMA 3.3 70B</td><td>RAG-powered floating chatbot <span class="new-badge">New</span></td></tr>
     <tr><td><strong>Utilities</strong></td><td>clsx, tailwind-merge</td><td>CSS class merging</td></tr>
     <tr><td><strong>Dataset</strong></td><td>UCI Student Performance</td><td><code>student-mat.csv</code> (Mathematics)</td></tr>
   </tbody>
@@ -431,9 +466,9 @@
 
 <div class="arch-box no-break">
   <div class="arch-flow">
-    <div class="arch-node">🖥️ React Frontend<small>Vite + TailwindCSS</small></div>
+    <div class="arch-node">🖥️ React Frontend<small>Vite + TailwindCSS v4</small></div>
     <div class="arch-arrow">→ JSON POST →</div>
-    <div class="arch-node">⚙️ Flask REST API<small>Port 5000</small></div>
+    <div class="arch-node">⚙️ Flask REST API<small>Port 5000 / Render</small></div>
     <div class="arch-arrow">→ Features →</div>
     <div class="arch-node">🧠 ML Model<small>Random Forest</small></div>
   </div>
@@ -445,6 +480,12 @@
     <div class="arch-arrow">→ JSON →</div>
     <div class="arch-node">🖥️ React UI</div>
   </div>
+  <br>
+  <div class="arch-flow" style="margin-top: 8px;">
+    <div class="arch-node" style="border-color: var(--accent);">🤖 Groq API<small>LLaMA 3.3 70B</small></div>
+    <div class="arch-arrow" style="color: var(--accent);">← RAG prompt →</div>
+    <div class="arch-node" style="border-color: var(--accent);">💬 AI Chatbot<small>Floating Widget</small></div>
+  </div>
 </div>
 
 <div class="page-break"></div>
@@ -452,15 +493,20 @@
 <!-- FRONTEND -->
 <h2><span class="emoji">🎨</span> Frontend Application</h2>
 
-<p>The frontend is a single-page React application with client-side routing managed by a state variable. Protected behind a <strong>login gate</strong> — users authenticate before accessing the dashboard.</p>
+<p>The frontend is a single-page React application with client-side routing managed by a state variable. Protected behind a <strong>login gate</strong> — users authenticate before accessing the dashboard. Features a cinematic <strong>loading screen</strong> with orbital animations after login, and a <strong>global floating AI chatbot</strong> available on every page.</p>
 
 <h3>Key Features</h3>
 
 <div class="feature-grid">
   <div class="feature-card no-break">
     <div class="icon">🔐</div>
-    <h4>Authentication Gate</h4>
-    <p>Email-based login page with dark/light mode toggle. User session in state. Profile dropdown with sign-out.</p>
+    <h4>Split-Screen Login</h4>
+    <p>Email & password login with social auth (Google, GitHub). Dark/light mode toggle. Right panel with animated gradient blobs and security hero.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">🚀</div>
+    <h4>Cinematic Loading Screen <span class="new-badge">New</span></h4>
+    <p>Post-login loading experience with orbital rings, progress bar, floating particles, shimmer effects, and animated status messages. Spring-physics exit animation.</p>
   </div>
   <div class="feature-card no-break">
     <div class="icon">📊</div>
@@ -470,32 +516,47 @@
   <div class="feature-card no-break">
     <div class="icon">📈</div>
     <h4>Rich Result Display</h4>
-    <p>Animated score counter, 3 metric cards, projected trajectory SVG chart, feature impact grid, AI advice panel.</p>
+    <p>Animated score counter, 3 metric cards, projected trajectory SVG chart, feature impact grid, AI advice panel. Full 24KB component.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">💬</div>
+    <h4>AI Chatbot (RAG) <span class="new-badge">New</span></h4>
+    <p>Floating chatbot powered by Groq (LLaMA 3.3 70B). RAG-grounded in student data from localStorage. Provides career roadmaps, placement advice, and student analysis. Expandable/collapsible with markdown rendering.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">👨‍🎓</div>
+    <h4>Students Directory (350+)</h4>
+    <p>Procedurally generated student profiles across 5 branches (CSE, IT, EXTC, Mech, Civil). Search, filter by branch, sort by CGPA, bookmark students, and add custom profiles. Recruiter-oriented CGPA color coding.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">🧠</div>
+    <h4>AI Insights Dashboard</h4>
+    <p>Overall predicted score with animated counter. Study hours, assignments, and target score stat cards. Interactive weekly performance bar chart (SVG). Per-subject prediction cards with confidence bars. AI recommendation panel.</p>
   </div>
   <div class="feature-card no-break">
     <div class="icon">📋</div>
     <h4>Prediction History</h4>
-    <p>Stored in localStorage (up to 20 entries). Notification bell in header. Dedicated browsing page.</p>
-  </div>
-  <div class="feature-card no-break">
-    <div class="icon">👨‍🎓</div>
-    <h4>Students Directory</h4>
-    <p>Full student listing with detailed profile modals and radar chart visualizations.</p>
+    <p>Stored in localStorage (up to 20 entries). Notification bell in header with dropdown. Dedicated browsing page with details.</p>
   </div>
   <div class="feature-card no-break">
     <div class="icon">🧭</div>
     <h4>Responsive Navigation</h4>
-    <p>Collapsible sidebar (icon/label modes). Hamburger menu on mobile. Animated page transitions.</p>
+    <p>Collapsible sidebar (icon/label modes). Hamburger menu with backdrop overlay on mobile. Animated page transitions with Framer Motion <code>AnimatePresence</code>.</p>
   </div>
   <div class="feature-card no-break">
     <div class="icon">🌙</div>
     <h4>Dark / Light Mode</h4>
-    <p>Full theme toggle with smooth transitions. Applied globally via document class.</p>
+    <p>Full theme toggle with smooth transitions. Applied globally via <code>document.documentElement</code> class. Persisted across header, sidebar, login page, and chatbot.</p>
+  </div>
+  <div class="feature-card no-break">
+    <div class="icon">👤</div>
+    <h4>User Profile Dropdown</h4>
+    <p>Profile button with email display, quick access to Settings, and Sign Out. Click-outside-to-close behavior using <code>useRef</code>.</p>
   </div>
   <div class="feature-card no-break">
     <div class="icon">✨</div>
     <h4>Premium UI Polish</h4>
-    <p>Skeleton loaders, toast notifications, micro-animations, gradient orbs, glassmorphism, spring physics.</p>
+    <p>Skeleton loaders, toast notifications, micro-animations, gradient orbs, glassmorphism, spring physics, animated blob backgrounds.</p>
   </div>
 </div>
 
@@ -505,21 +566,113 @@
     <tr><th>Page</th><th>Component</th><th>Purpose</th></tr>
   </thead>
   <tbody>
-    <tr><td>🏠 Dashboard</td><td><code>App.jsx</code></td><td>Prediction form + results display</td></tr>
+    <tr><td>🔐 Login</td><td><code>LoginPage.jsx</code></td><td>Split-screen authentication with social buttons & theme toggle</td></tr>
+    <tr><td>🏠 Dashboard</td><td><code>App.jsx</code></td><td>Prediction form + results display + history sidebar</td></tr>
     <tr><td>📊 Analytics</td><td><code>AnalyticsPage.jsx</code></td><td>Charts & statistical visualizations</td></tr>
-    <tr><td>👥 Students</td><td><code>StudentsDirectoryPage.jsx</code></td><td>Full student directory with modals</td></tr>
+    <tr><td>👥 Students</td><td><code>StudentsDirectoryPage.jsx</code></td><td>350+ student directory with search, filters, bookmarks & add profile</td></tr>
     <tr><td>📋 Prediction History</td><td><code>StudentsPage.jsx</code></td><td>Browse past predictions</td></tr>
     <tr><td>📈 Performance</td><td><code>PerformancePage.jsx</code></td><td>Performance metrics overview</td></tr>
-    <tr><td>🧠 AI Insights</td><td><code>InsightsPage.jsx</code></td><td>ML-powered insights</td></tr>
+    <tr><td>🧠 AI Insights</td><td><code>InsightsPage.jsx</code></td><td>AI-powered subject predictions, weekly trends & recommendations</td></tr>
     <tr><td>⚙️ Settings</td><td><code>SettingsPage.jsx</code></td><td>Theme & app configuration</td></tr>
     <tr><td>❓ Help & Support</td><td><code>HelpPage.jsx</code></td><td>Documentation & support</td></tr>
   </tbody>
 </table>
 
-<h3>Reusable UI Components</h3>
-<p>Located in <code>src/components/ui/</code>: <strong>Card</strong>, <strong>Badge</strong>, <strong>Button</strong>, <strong>Avatar</strong>, <strong>Tabs</strong>, <strong>Progress</strong>, <strong>Separator</strong></p>
+<h3>Component Inventory (14 Standalone + 7 UI Primitives)</h3>
+
+<table>
+  <thead>
+    <tr><th>Component</th><th>Size</th><th>Purpose</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>ResultDisplay.jsx</code></td><td>24 KB</td><td>Full-screen prediction result with animations, charts, and advice</td></tr>
+    <tr><td><code>StudentModal.jsx</code></td><td>23 KB</td><td>Comprehensive student profile modal with radar chart & recruiter tools</td></tr>
+    <tr><td><code>Chatbot.jsx</code></td><td>11 KB</td><td>Floating AI chatbot with RAG, Groq API, expand/collapse, markdown</td></tr>
+    <tr><td><code>PredictionForm.jsx</code></td><td>11 KB</td><td>Two-step wizard with validation, auto-fill, and sample data</td></tr>
+    <tr><td><code>LoadingScreen.jsx</code></td><td>9 KB</td><td>Post-login cinematic loading with orbital animations & particles</td></tr>
+    <tr><td><code>Sidebar.jsx</code></td><td>5 KB</td><td>Collapsible sidebar with icon/label modes and active indicators</td></tr>
+    <tr><td><code>StudentRadarChart.jsx</code></td><td>2.6 KB</td><td>Radar chart visualization for student profiles</td></tr>
+    <tr><td><code>ModelInfo.jsx</code></td><td>2.5 KB</td><td>ML model details and accuracy info card</td></tr>
+    <tr><td><code>PredictionHistory.jsx</code></td><td>2.5 KB</td><td>Compact prediction history list for dashboard sidebar</td></tr>
+    <tr><td><code>SkeletonCard.jsx</code></td><td>1.4 KB</td><td>Animated skeleton loading placeholder cards</td></tr>
+    <tr><td><code>AIInsights.jsx</code></td><td>1.3 KB</td><td>AI insights summary widget</td></tr>
+    <tr><td><code>FeatureImportanceChart.jsx</code></td><td>1.1 KB</td><td>Horizontal bar chart for feature importance scores</td></tr>
+    <tr><td><code>Hero.jsx</code></td><td>0.9 KB</td><td>Hero/header section component</td></tr>
+    <tr><td><code>Footer.jsx</code></td><td>0.6 KB</td><td>Application footer</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Reusable UI Primitives</strong> (in <code>src/components/ui/</code>): <strong>Card</strong>, <strong>Badge</strong>, <strong>Button</strong>, <strong>Avatar</strong>, <strong>Tabs</strong>, <strong>Progress</strong>, <strong>Separator</strong></p>
 
 <div class="page-break"></div>
+
+<!-- AI CHATBOT DEEP DIVE -->
+<h2><span class="emoji">🤖</span> AI Chatbot <span class="new-badge">New</span></h2>
+
+<div class="card no-break">
+  <h4>Overview</h4>
+  <p>A <strong>globally available floating chatbot</strong> rendered on every authenticated page. Powered by the <strong>Groq API</strong> using the <strong>LLaMA 3.3 70B Versatile</strong> model. Implements <strong>Retrieval-Augmented Generation (RAG)</strong> by injecting student directory data from <code>localStorage</code> into the system prompt.</p>
+</div>
+
+<div class="card no-break">
+  <h4>Key Capabilities</h4>
+  <ul>
+    <li><strong>Career Roadmap Generation</strong> — Step-by-step guides based on target roles or engineering branches</li>
+    <li><strong>Student Profile Analysis</strong> — Evaluates CGPA, internships, projects, and certifications against placement criteria</li>
+    <li><strong>Job Readiness Assessment</strong> — Rates students across 4 pillars: CGPA, Internships, Projects, Certifications</li>
+    <li><strong>RAG Context</strong> — Auto-retrieves top student profiles from the local directory to ground AI responses</li>
+    <li><strong>Markdown Rendering</strong> — Parses bold text and bullet points inline for formatted chat responses</li>
+    <li><strong>Expand/Collapse</strong> — Togglable between compact (380px) and expanded (800px) modes</li>
+    <li><strong>Animated Toggle</strong> — Floating button with rotation animation and tooltip on hover</li>
+  </ul>
+</div>
+
+<!-- LOADING SCREEN DEEP DIVE -->
+<h2><span class="emoji">🚀</span> Loading Screen <span class="new-badge">New</span></h2>
+
+<div class="card no-break">
+  <h4>Post-Login Cinematic Experience</h4>
+  <ul>
+    <li><strong>5 sequential status messages</strong> with fade-in transitions (e.g., "Initiating quantum handshake…", "Calibrating reality matrix…")</li>
+    <li><strong>Orbital animation</strong> — Nested counter-rotating rings around a pulsing Loader2 icon</li>
+    <li><strong>Progress bar</strong> with shimmer effect (4.2s ease-in-out fill)</li>
+    <li><strong>Floating particles</strong> — 5 animated dots with sinusoidal movement</li>
+    <li><strong>Completion state</strong> — CheckCircle2 icon with spring entrance, "Ready!" message</li>
+    <li><strong>Exit animation</strong> — Full-screen slide-up using cubic-bezier [0.76, 0, 0.24, 1]</li>
+    <li>Background gradient orbs with scale + opacity pulsing</li>
+  </ul>
+</div>
+
+<div class="page-break"></div>
+
+<!-- STUDENTS DIRECTORY DEEP DIVE -->
+<h2><span class="emoji">👥</span> Students Directory</h2>
+
+<div class="card no-break">
+  <h4>Architecture & Data</h4>
+  <ul>
+    <li><strong>350+ procedurally generated students</strong> — 70 per branch (CSE, IT, EXTC, Mechanical, Civil)</li>
+    <li>Realistic Indian names, enrollment numbers, branch-specific skills and certifications</li>
+    <li>CGPA distribution: 80% between 6.0–8.5, 20% high-performers 8.5–10.0</li>
+    <li><strong>Persistent localStorage</strong> — Directory and custom profiles survive page reloads</li>
+    <li><strong>Legacy profile migration</strong> — Auto-migrates older <code>customStudentProfiles</code> format</li>
+  </ul>
+</div>
+
+<div class="card no-break">
+  <h4>Features</h4>
+  <ul>
+    <li><strong>Search</strong> — Filter by name, enrollment number, or skills in real-time</li>
+    <li><strong>Branch Filters</strong> — Tab bar with per-branch student counts</li>
+    <li><strong>Sorting</strong> — Default, Alphabetical (A-Z), CGPA (High to Low)</li>
+    <li><strong>Bookmarks</strong> — Star/unstar any student; dedicated "Bookmarked" filter tab with toast feedback</li>
+    <li><strong>Add Profile Modal</strong> — Create custom student profiles with name, enrollment, branch, CGPA, email, skills, certifications, attendance, projects, and internships</li>
+    <li><strong>Student Profile Modal</strong> — 23KB component with detailed view, radar chart, recruiter tools</li>
+    <li><strong>CGPA Color Coding</strong> — Emerald (≥9.0), Sky (≥7.5), Amber (≥6.5), Slate (below)</li>
+    <li><strong>Lazy Loading</strong> — Load 24 students at a time with "Load More" pagination</li>
+    <li><strong>Skeleton Loading</strong> — Animated placeholder cards during initial 600ms load</li>
+  </ul>
+</div>
 
 <!-- HOW TO RUN -->
 <h2><span class="emoji">🚀</span> How to Run</h2>
@@ -541,6 +694,14 @@ npm run dev
 </div>
 
 <div class="card no-break">
+  <h4>AI Chatbot Setup (optional)</h4>
+  <pre><code># Create .env.local in student-performance-frontend/
+VITE_GROQ_API_KEY=your_groq_api_key_here
+
+# Get a free key at https://console.groq.com</code></pre>
+</div>
+
+<div class="card no-break">
   <h4>Train a New Model (optional)</h4>
   <pre><code>python student_performance_tuned_model.py
 # → Saves final_student_model.pkl + scaler.pkl</code></pre>
@@ -558,18 +719,21 @@ npm run dev
       <tr><td><strong>ML Models</strong></td><td>Random Forest, XGBoost (with hyperparameter tuning)</td></tr>
       <tr><td><strong>Dataset</strong></td><td>UCI Student Performance (Mathematics), 395 records</td></tr>
       <tr><td><strong>Backend</strong></td><td>Flask REST API with CORS</td></tr>
-      <tr><td><strong>Frontend</strong></td><td>React 19 + Vite + TailwindCSS v4</td></tr>
-      <tr><td><strong>Key Libraries</strong></td><td>scikit-learn, XGBoost, Framer Motion, Chart.js, Lucide</td></tr>
+      <tr><td><strong>Frontend</strong></td><td>React 19 + Vite 7.3 + TailwindCSS v4</td></tr>
+      <tr><td><strong>AI Integration</strong></td><td>Groq API (LLaMA 3.3 70B) — RAG chatbot for career advice</td></tr>
+      <tr><td><strong>Key Libraries</strong></td><td>scikit-learn, XGBoost, Framer Motion, Chart.js, Lucide, react-hot-toast</td></tr>
       <tr><td><strong>Deployment</strong></td><td>API hosted on Render (student-performance-ve59.onrender.com)</td></tr>
-      <tr><td><strong>Pages</strong></td><td>8 pages: Dashboard, Analytics, Students, History, Performance, Insights, Settings, Help</td></tr>
-      <tr><td><strong>Authentication</strong></td><td>Email-based login gate</td></tr>
-      <tr><td><strong>Theme</strong></td><td>Dark/Light mode with animated transitions</td></tr>
+      <tr><td><strong>Pages</strong></td><td>9 pages: Login, Dashboard, Analytics, Students, History, Performance, Insights, Settings, Help</td></tr>
+      <tr><td><strong>Components</strong></td><td>14 standalone components + 7 reusable UI primitives + 8 page components</td></tr>
+      <tr><td><strong>Students Directory</strong></td><td>350+ procedurally generated profiles across 5 engineering branches</td></tr>
+      <tr><td><strong>Authentication</strong></td><td>Email-based login gate with social auth buttons + loading screen</td></tr>
+      <tr><td><strong>Theme</strong></td><td>Dark/Light mode with animated transitions (global)</td></tr>
     </tbody>
   </table>
 </div>
 
 <div class="footer">
-  EduPredict — Student Performance Prediction System &nbsp;|&nbsp; Project Walkthrough Document &nbsp;|&nbsp; Generated March 2026
+  EduPredict — Student Performance Prediction System &nbsp;|&nbsp; Project Walkthrough Document &nbsp;|&nbsp; Updated March 2026
 </div>
 
 </div>
