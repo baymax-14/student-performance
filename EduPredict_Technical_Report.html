@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EduPredict — Full Technical Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    :root {
+      --primary: #0ea5e9;
+      --primary-dark: #0284c7;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+    }
+    body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--bg); line-height: 1.7; font-size: 14px; padding: 40px; margin: 0; }
+    .container { max-width: 900px; margin: 0 auto; background: var(--surface); padding: 50px 60px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+    h1 { font-size: 34px; font-weight: 800; margin-bottom: 24px; color: var(--primary-dark); padding-bottom: 20px; text-align: center; border-bottom: 2px solid var(--border); }
+    h2 { font-size: 24px; font-weight: 700; margin: 40px 0 20px; color: var(--primary-dark); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    h3 { font-size: 18px; font-weight: 700; margin: 24px 0 12px; color: var(--text); }
+    p { margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+    th { background: #f1f5f9; text-align: left; padding: 14px 16px; border: 1px solid var(--border); font-weight: 700; text-transform: uppercase; color: var(--text-muted); font-size: 12px; }
+    td { padding: 14px 16px; border: 1px solid var(--border); vertical-align: top; }
+    tr:nth-child(even) { background: #f8fafc; }
+    ul, ol { margin: 16px 0 24px 24px; }
+    code { background: #f1f5f9; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 13px; color: #be185d; border: 1px solid var(--border); }
+    pre { background: #1e293b; color: #e2e8f0; padding: 20px 24px; border-radius: 10px; overflow-x: auto; margin: 20px 0; font-family: 'Consolas', monospace; font-size: 13px; }
+    pre code { color: inherit; background: none; padding: 0; border: none; }
+    blockquote { border-left: 4px solid var(--primary); padding-left: 20px; color: var(--text-muted); margin: 24px 0; background: #f0f9ff; padding: 20px; border-radius: 0 8px 8px 0; font-weight: 500; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="container" id="content">Loading full technical report...</div>
+  <script>
+    const markdownText = `# 🎓 EduPredict — Full Technical Report
+
+> **Student Performance Prediction System**  
+> Complete analysis of the tech stack, architecture, algorithms, API, data layer, workflow, and implementation.
+
+---
+
+## 📋 Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [Full Tech Stack](#2-full-tech-stack)
+3. [System Architecture](#3-system-architecture)
+4. [Machine Learning Pipeline & Algorithms](#4-machine-learning-pipeline--algorithms)
+5. [Backend API](#5-backend-api)
+6. [Frontend Application](#6-frontend-application)
+7. [AI Chatbot Integration](#7-ai-chatbot-integration)
+8. [Database / Data Layer](#8-database--data-layer)
+9. [Application Workflow](#9-application-workflow)
+10. [File-Level Implementation Breakdown](#10-file-level-implementation-breakdown)
+11. [Deployment & Infrastructure](#11-deployment--infrastructure)
+12. [Project Statistics](#12-project-statistics)
+
+---
+
+## 1. Executive Summary
+
+**EduPredict** is a full-stack, AI-powered student performance prediction system that combines **machine learning classification**, a **RESTful API**, a **modern React dashboard**, and a **RAG-powered AI chatbot**. The system ingests student academic and behavioral data, runs it through a trained ML model, and presents rich, animated prediction results with confidence scores, feature importance analysis, and actionable AI-generated advice.
+
+| Dimension | Details |
+|-----------|---------|
+| **Problem** | Predict student academic performance tier (Poor / Average / Good) from 7 features |
+| **Approach** | Supervised classification using ensemble tree models |
+| **Dataset** | UCI Student Performance (Mathematics), 395 records, 33 original attributes |
+| **Languages** | Python (ML + API), JavaScript/JSX (Frontend), CSS, HTML |
+| **Total Components** | 14 standalone + 7 UI primitives + 8 page components = **29 React components** |
+| **Total Pages** | 9 (Login, Dashboard, Analytics, Students, History, Performance, Insights, Settings, Help) |
+
+---
+
+## 2. Full Tech Stack
+
+### 2.1 Frontend
+
+| Technology | Version | Role |
+|-----------|---------|------|
+| **React** | 19.2.0 | UI component framework (functional components with Hooks) |
+| **Vite** | 7.3.1 | Build tool & dev server (ESM-first, HMR) |
+| **TailwindCSS** | 4.2.1 | Utility-first CSS framework (with \`@tailwindcss/vite\` plugin) |
+| **Framer Motion** | 12.35.2 | Animation library (spring physics, \`AnimatePresence\`, layout transitions) |
+| **Chart.js** | 4.5.1 | Canvas-based charting library |
+| **react-chartjs-2** | 5.3.1 | React wrapper for Chart.js |
+| **Lucide React** | 0.577.0 | Icon library (600+ SVG icons) |
+| **react-hot-toast** | 2.6.0 | Toast notification system |
+| **clsx** | 2.1.1 | Conditional CSS class utility |
+| **tailwind-merge** | 3.5.0 | Intelligent Tailwind class merging (conflict resolution) |
+
+**Dev Dependencies:**
+
+| Tool | Version | Role |
+|------|---------|------|
+| \`@vitejs/plugin-react\` | 5.1.1 | React Fast Refresh for Vite |
+| ESLint | 9.39.1 | JavaScript linting |
+| PostCSS | 8.5.8 | CSS transformation pipeline |
+| Autoprefixer | 10.4.27 | Vendor prefix automation |
+
+### 2.2 Backend
+
+| Technology | Role |
+|-----------|------|
+| **Python 3.x** | Runtime for ML scripts and API server |
+| **Flask** | Lightweight WSGI web framework |
+| **Flask-CORS** | Cross-Origin Resource Sharing middleware |
+| **NumPy** | Numerical array operations for input processing |
+| **Joblib** | Model serialization/deserialization (\`.pkl\` files) |
+
+### 2.3 Machine Learning
+
+| Technology | Role |
+|-----------|------|
+| **scikit-learn** | \`RandomForestClassifier\`, \`StandardScaler\`, \`LabelEncoder\`, \`GridSearchCV\`, \`train_test_split\`, metrics |
+| **XGBoost** (\`XGBClassifier\`) | Gradient boosting ensemble classifier |
+| **Pandas** | DataFrame operations for data loading & feature engineering |
+
+### 2.4 AI / LLM Integration
+
+| Technology | Role |
+|-----------|------|
+| **Groq API** | LLM inference endpoint (OpenAI-compatible \`/chat/completions\`) |
+| **LLaMA 3.3 70B Versatile** | Large language model for chat responses |
+| **RAG (Retrieval-Augmented Generation)** | Student data injected from \`localStorage\` into system prompt |
+
+### 2.5 Data Layer
+
+| Technology | Role |
+|-----------|------|
+| **CSV** (\`student-mat.csv\`) | UCI dataset — 395 records, semicolon-delimited, 33 columns |
+| **Joblib \`.pkl\`** | Serialized ML model (~3.3 MB) + StandardScaler (~1 KB) |
+| **Browser \`localStorage\`** | Client-side persistence for prediction history (up to 20), student directory (350+ profiles), bookmarks, custom profiles, theme |
+| **Environment Variables** (\`.env.local\`) | Groq API key stored as \`VITE_GROQ_API_KEY\` |
+
+---
+
+## 3. System Architecture
+
+### 3.1 High-Level Architecture
+
+\`\`\`
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CLIENT (Browser)                                  │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  React 19 + Vite 7.3 (SPA)                                         │    │
+│  │  ┌──────────┐ ┌────────────┐ ┌────────────┐ ┌──────────────────┐  │    │
+│  │  │LoginPage │ │ Dashboard  │ │  9 Pages   │ │  AI Chatbot     │  │    │
+│  │  │ (Auth)   │→│ (Predict)  │ │ (Sidebar)  │ │ (Floating/Groq) │  │    │
+│  │  └──────────┘ └─────┬──────┘ └────────────┘ └────────┬─────────┘  │    │
+│  │                     │                                  │            │    │
+│  │              JSON POST /predict                 Groq REST API      │    │
+│  └─────────────────────┼──────────────────────────────────┼────────────┘    │
+│                        │                                  │                 │
+│  localStorage:         │                                  │                 │
+│  - predictionHistory   │                                  │                 │
+│  - studentDirectoryData│                                  │                 │
+│  - bookmarkedStudents  │                                  │                 │
+│  - customStudentProfiles                                  │                 │
+└────────────────────────┼──────────────────────────────────┼─────────────────┘
+                         │ HTTPS                            │ HTTPS
+                         ▼                                  ▼
+┌────────────────────────────────────┐    ┌──────────────────────────────────┐
+│   Flask REST API (Backend)         │    │   Groq Cloud API                 │
+│   student-performance-ve59.        │    │   api.groq.com                   │
+│   onrender.com                     │    │                                  │
+│                                    │    │   Model: llama-3.3-70b-versatile │
+│   Routes:                          │    │   Endpoint: /openai/v1/          │
+│   GET  /       → Health check      │    │             chat/completions     │
+│   POST /predict → ML prediction    │    │   Temp: 0.7                      │
+│                                    │    └──────────────────────────────────┘
+│   ┌──────────────┐ ┌──────────┐   │
+│   │ ML Model     │ │ Scaler   │   │
+│   │ (RF/XGB)     │ │ Standard │   │
+│   │ 3.3 MB .pkl  │ │ 1 KB .pkl│   │
+│   └──────────────┘ └──────────┘   │
+└────────────────────────────────────┘
+\`\`\`
+
+### 3.2 Data Flow — Prediction Pipeline
+
+\`\`\`mermaid
+flowchart TD
+    A["👤 User fills PredictionForm\\n(7 features)"] --> B["📤 JSON POST to /predict\\n(attendance, internal_avg,\\nstudytime, backlogs,\\nschoolsup, activities, higher)"]
+    B --> C["⚙️ Flask API receives request"]
+    C --> D["📏 StandardScaler.transform()\\nNormalize features"]
+    D --> E["🧠 Model.predict()\\nClassify into {0, 1, 2}"]
+    D --> F["📊 Model.predict_proba()\\nGet confidence scores"]
+    D --> G["📈 Model.feature_importances_\\nExtract per-feature weights"]
+    E --> H["🏷️ Label Mapping\\n0→Poor, 1→Average, 2→Good"]
+    F --> I["🎯 max(probabilities)\\n→ confidence score"]
+    H --> J["📦 JSON Response"]
+    I --> J
+    G --> J
+    J --> K["🖥️ ResultDisplay renders:\\n- Score animation\\n- Metric cards\\n- Trajectory chart\\n- Feature importance grid\\n- AI advice panel"]
+    K --> L["💾 Save to localStorage\\n(predictionHistory, max 20)"]
+\`\`\`
+
+### 3.3 Data Flow — AI Chatbot (RAG)
+
+\`\`\`mermaid
+flowchart TD
+    A["💬 User types message in Chatbot"] --> B["📥 Retrieve student data\\nfrom localStorage\\n(studentDirectoryData)"]
+    B --> C["🧩 Build RAG System Prompt:\\n- Role: Career Advisor\\n- Context: Top 5 students\\n- Rules: Markdown, concise,\\n  evaluate on 4 pillars"]
+    C --> D["📤 POST to Groq API\\n/openai/v1/chat/completions\\nmodel: llama-3.3-70b-versatile\\ntemp: 0.7"]
+    D --> E["🤖 LLaMA generates response\\n(career roadmap, analysis,\\njob readiness assessment)"]
+    E --> F["🖥️ Render in chat bubble\\nwith inline Markdown parsing\\n(bold, bullets)"]
+\`\`\`
+
+---
+
+## 4. Machine Learning Pipeline & Algorithms
+
+### 4.1 Dataset
+
+| Property | Details |
+|----------|---------|
+| **Source** | UCI Machine Learning Repository — Student Performance (Mathematics) |
+| **File** | \`student-mat.csv\` (semicolon-delimited) |
+| **Records** | 395 students |
+| **Original Columns** | 33 (school, sex, age, address, famsize, Pstatus, Medu, Fedu, Mjob, Fjob, reason, guardian, traveltime, studytime, failures, schoolsup, famsup, paid, activities, nursery, higher, internet, romantic, famrel, freetime, goout, Dalc, Walc, health, absences, G1, G2, G3) |
+| **Target Variable** | \`G3\` (final grade, 0–20 scale) |
+
+### 4.2 Feature Engineering
+
+7 features are extracted/engineered from the raw dataset:
+
+| Feature | Formula / Source | Type | Range |
+|---------|-----------------|------|-------|
+| \`attendance\` | \`100 - absences\` | Numeric (engineered) | 25–100 |
+| \`internal_avg\` | \`(G1 + G2) / 2\` | Numeric (engineered) | 0–20 |
+| \`studytime\` | Raw column | Numeric (ordinal) | 1–4 |
+| \`backlogs\` | \`failures\` (renamed) | Numeric | 0–4 |
+| \`schoolsup\` | Raw column → LabelEncoder | Binary (0/1) | {0, 1} |
+| \`activities\` | Raw column → LabelEncoder | Binary (0/1) | {0, 1} |
+| \`higher\` | Raw column → LabelEncoder | Binary (0/1) | {0, 1} |
+
+### 4.3 Target Encoding (3-Class Classification)
+
+\`\`\`python
+def grade_to_label(g):
+    if g < 10:  return 0   # Poor Performance
+    elif g < 14: return 1  # Average Performance
+    else:        return 2  # Good Performance
+\`\`\`
+
+### 4.4 Preprocessing Pipeline
+
+\`\`\`
+Raw CSV
+  → Feature Engineering (attendance, internal_avg, backlogs)
+  → Label Encoding (schoolsup, activities, higher → 0/1)
+  → train_test_split (80/20, stratified, random_state=42)
+  → StandardScaler (fit on train, transform both)
+  → Model Training
+\`\`\`
+
+### 4.5 Algorithms
+
+#### Algorithm 1: Random Forest Classifier
+
+| Parameter | Base Model | Tuned Model (GridSearchCV) |
+|-----------|-----------|---------------------------|
+| \`n_estimators\` | 300 | Grid: {200, 300, 400} |
+| \`max_depth\` | 12 | Grid: {8, 12, 16} |
+| \`min_samples_split\` | default (2) | Grid: {2, 5} |
+| \`min_samples_leaf\` | default (1) | Grid: {1, 2} |
+| \`random_state\` | 42 | 42 |
+
+**How it works:**  
+Random Forest builds an ensemble of \`n_estimators\` decision trees, each trained on a bootstrap sample of the training data with a random subset of features. Final prediction = majority vote of all trees. Feature importance = mean decrease in impurity (Gini) across all trees.
+
+#### Algorithm 2: XGBoost Classifier
+
+| Parameter | Base Model | Tuned Model (GridSearchCV) |
+|-----------|-----------|---------------------------|
+| \`n_estimators\` | 300 | Grid: {200, 300} |
+| \`learning_rate\` | 0.05 | Grid: {0.03, 0.05} |
+| \`max_depth\` | 6 | Grid: {4, 6} |
+| \`subsample\` | default (1.0) | Grid: {0.8, 1.0} |
+| \`colsample_bytree\` | default (1.0) | Grid: {0.8, 1.0} |
+| \`objective\` | \`multi:softprob\` | \`multi:softprob\` |
+| \`num_class\` | 3 | 3 |
+| \`eval_metric\` | \`mlogloss\` | \`mlogloss\` |
+
+**How it works:**  
+XGBoost (eXtreme Gradient Boosting) builds trees sequentially, where each new tree corrects the errors of the previous ensemble. Uses \`multi:softprob\` for multi-class probability output. Regularization via \`learning_rate\`, \`subsample\`, and \`colsample_bytree\`.
+
+### 4.6 Model Selection & Evaluation
+
+| Script | Method | Scoring | Selection Criteria |
+|--------|--------|---------|--------------------|
+| \`student_performance_model.py\` | Direct fit + 5-fold CV | Accuracy, F1 (weighted), CV score | Best F1 score |
+| \`student_performance_tuned_model.py\` | \`GridSearchCV\` (5-fold CV) | \`f1_weighted\` | Best F1 score across all grid combinations |
+
+**Champion model** is saved as \`final_student_model.pkl\` along with \`scaler.pkl\`. Reports indicate Random Forest or XGBoost wins depending on the data split, but both achieve comparable performance on this dataset.
+
+### 4.7 Model Outputs Used in Production
+
+| Output | Source | Used In |
+|--------|--------|---------|
+| **Predicted Class** (0, 1, 2) | \`model.predict()\` | Label mapping → Performance tier name |
+| **Confidence Score** | \`max(model.predict_proba())\` | Percentage display in UI |
+| **Feature Importances** (7 values) | \`model.feature_importances_\` | Bar chart in ResultDisplay |
+
+---
+
+## 5. Backend API
+
+### 5.1 Technology
+
+- **Framework:** Flask (Python)
+- **CORS:** \`flask_cors.CORS(app)\` enabled for all origins
+- **Server:** Runs on \`0.0.0.0:5000\` (configurable via \`PORT\` env var)
+- **Hosting:** Deployed on **Render** at \`student-performance-ve59.onrender.com\`
+
+### 5.2 API Endpoints
+
+#### \`GET /\`
+**Health Check**
+
+| Field | Value |
+|-------|-------|
+| Method | \`GET\` |
+| Response | \`"Student Performance Prediction API is running"\` |
+| Status | \`200 OK\` |
+
+---
+
+#### \`POST /predict\`
+**Core Prediction Endpoint**
+
+**Request Body (JSON):**
+\`\`\`json
+{
+  "attendance": 85,
+  "internal_avg": 14.5,
+  "studytime": 3,
+  "backlogs": 0,
+  "schoolsup": 0,
+  "activities": 1,
+  "higher": 1
+}
+\`\`\`
+
+**Response Body (JSON):**
+\`\`\`json
+{
+  "prediction": 2,
+  "performance": "Good Performance",
+  "confidence": 0.87,
+  "feature_importance": {
+    "attendance": 0.12,
+    "internal_avg": 0.45,
+    "studytime": 0.08,
+    "backlogs": 0.15,
+    "schoolsup": 0.03,
+    "activities": 0.05,
+    "higher": 0.12
+  }
+}
+\`\`\`
+
+**Error Response:**
+\`\`\`json
+{
+  "error": "Error description string"
+}
+\`\`\`
+
+### 5.3 API Processing Pipeline
+
+\`\`\`
+1. Receive JSON body via request.get_json()
+2. Extract 7 features in exact order → NumPy array (1, 7)
+3. scaler.transform() → normalized features
+4. model.predict() → class label (0/1/2)
+5. model.predict_proba() → probability array → max = confidence
+6. model.feature_importances_ → dict of {feature_name: weight}
+7. Return JSON with prediction, performance label, confidence, feature_importance
+\`\`\`
+
+### 5.4 Model Loading
+
+Both \`final_student_model.pkl\` and \`scaler.pkl\` are loaded **at server startup** (global scope), not per-request. This ensures:
+- Zero cold-load latency on prediction requests
+- Consistent model state across all requests
+
+---
+
+## 6. Frontend Application
+
+### 6.1 Architecture
+
+- **Framework:** React 19.2 (functional components, Hooks)
+- **Build Tool:** Vite 7.3 (ESM, HMR)
+- **Routing:** Client-side routing via \`activePage\` state (no react-router)
+- **State Management:** \`useState\` + \`useEffect\` hooks (no Redux/Zustand)
+- **Authentication:** Local email-based login gate (no backend auth)
+- **Persistence:** \`localStorage\` for history, directory, bookmarks, theme
+
+### 6.2 Application Flow
+
+\`\`\`
+LoginPage
+  ↓ (onLogin)
+LoadingScreen (3-5 second cinematic animation)
+  ↓ (onComplete)
+Dashboard Layout:
+  ├── Sidebar (left, collapsible)
+  ├── Header (top, dark mode, notifications, profile)
+  ├── Page Content (center, animated transitions)
+  └── Chatbot (floating, bottom-right)
+\`\`\`
+
+### 6.3 All 9 Pages
+
+| # | Page | Component | Description |
+|---|------|-----------|-------------|
+| 1 | **Login** | \`LoginPage.jsx\` (14 KB) | Split-screen login with social auth buttons (Google, GitHub, Microsoft), dark/light toggle, animated gradient blobs, security hero illustration |
+| 2 | **Dashboard** | \`App.jsx\` (15 KB) | Main prediction interface: \`PredictionForm\` → \`ResultDisplay\` + \`PredictionHistory\` sidebar |
+| 3 | **Analytics** | \`AnalyticsPage.jsx\` (3.3 KB) | Charts & statistical visualizations using Chart.js |
+| 4 | **Students** | \`StudentsDirectoryPage.jsx\` (28 KB) | 350+ procedurally generated student profiles with search, filters, sort, bookmarks, add profile |
+| 5 | **Prediction History** | \`StudentsPage.jsx\` (5 KB) | Browse past predictions from localStorage |
+| 6 | **Performance** | \`PerformancePage.jsx\` (3.4 KB) | Performance metrics overview |
+| 7 | **AI Insights** | \`InsightsPage.jsx\` (20 KB) | AI-powered subject predictions, weekly trends chart (SVG), recommendation panel |
+| 8 | **Settings** | \`SettingsPage.jsx\` (4.4 KB) | Theme toggle & app configuration |
+| 9 | **Help & Support** | \`HelpPage.jsx\` (10 KB) | Documentation & support |
+
+### 6.4 Component Inventory (14 Standalone)
+
+| Component | Size | Purpose |
+|-----------|------|---------|
+| \`ResultDisplay.jsx\` | 24 KB | Full prediction result with animated score counter, 3 metric cards, projected trajectory SVG line chart, feature impact horizontal bar grid, AI-generated advice panel |
+| \`StudentModal.jsx\` | 23 KB | Comprehensive student profile modal: header card, stats grid, radar chart, skills/certifications list, recruiter tools (shortlist, contact) |
+| \`Chatbot.jsx\` | 12 KB | Floating AI chatbot (Groq/LLaMA): expand/collapse, RAG system prompt, markdown rendering, animated toggle button |
+| \`PredictionForm.jsx\` | 12 KB | Two-step wizard: Step 1 (academic: attendance, internal avg, backlogs), Step 2 (habits: study time, support, activities, higher ed). Auto-fill & reset buttons |
+| \`LoadingScreen.jsx\` | 9 KB | Post-login cinematic: orbital rings, progress bar, floating particles, 5 sequential status messages, spring exit animation |
+| \`Sidebar.jsx\` | 6 KB | Collapsible sidebar: icon/label modes, active indicator bar, EduPredict branding, navigation options |
+| \`StudentRadarChart.jsx\` | 2.6 KB | Radar/spider chart for multi-dimensional student profile visualization |
+| \`ModelInfo.jsx\` | 2.5 KB | ML model details card: algorithm name, accuracy, dataset info |
+| \`PredictionHistory.jsx\` | 2.5 KB | Compact recent predictions list for dashboard sidebar |
+| \`SkeletonCard.jsx\` | 1.5 KB | Animated pulsing skeleton loading placeholder cards |
+| \`AIInsights.jsx\` | 1.3 KB | AI insights summary widget |
+| \`FeatureImportanceChart.jsx\` | 1.1 KB | Horizontal bar chart for feature importance scores |
+| \`Hero.jsx\` | 0.9 KB | Landing hero section component |
+| \`Footer.jsx\` | 0.6 KB | Application footer |
+
+### 6.5 Reusable UI Primitives (7)
+
+Located in \`src/components/ui/\`:
+
+| Component | Size | Purpose |
+|-----------|------|---------|
+| \`tabs.jsx\` | 1.9 KB | Tab navigation (Tabs, TabsList, TabsTrigger, TabsContent) |
+| \`card.jsx\` | 1.2 KB | Card container with variants (Card, CardHeader, CardContent, CardTitle, CardDescription) |
+| \`avatar.jsx\` | 1 KB | Avatar with fallback initials |
+| \`button.jsx\` | 0.9 KB | Button with variants and sizes |
+| \`badge.jsx\` | 0.6 KB | Badge/chip component with color variants |
+| \`progress.jsx\` | 0.5 KB | Progress bar |
+| \`separator.jsx\` | 0.5 KB | Horizontal/vertical divider |
+
+### 6.6 Key Frontend Design Patterns
+
+- **Dark/Light Mode:** Toggled via \`isDark\` state → \`document.documentElement.classList.add/remove('dark')\`. TailwindCSS \`dark:\` variant handles all styling.
+- **Animated Page Transitions:** \`AnimatePresence\` + \`motion.div\` with \`opacity\` and \`y\` animation on page switch.
+- **Click-Outside-to-Close:** \`useRef\` + \`mousedown\` event listener for notification and user profile dropdowns.
+- **Lazy Loading:** Students directory shows 24 at a time with "Load More" pagination.
+- **Skeleton Loading:** 600ms simulated delay with \`SkeletonCard\` placeholders before content appears.
+- **Responsive Design:** Mobile hamburger menu with backdrop overlay, sidebar auto-closes on page selection for mobile (\`window.innerWidth < 768\`).
+
+---
+
+## 7. AI Chatbot Integration
+
+### 7.1 Architecture
+
+| Aspect | Details |
+|--------|---------|
+| **Provider** | Groq Cloud (https://api.groq.com) |
+| **Model** | \`llama-3.3-70b-versatile\` |
+| **API Format** | OpenAI-compatible (\`/openai/v1/chat/completions\`) |
+| **Authentication** | Bearer token via \`VITE_GROQ_API_KEY\` (from \`.env.local\`) |
+| **Temperature** | 0.7 |
+| **Technique** | Retrieval-Augmented Generation (RAG) |
+
+### 7.2 RAG Implementation
+
+The chatbot implements a lightweight RAG pattern:
+
+1. **Retrieval:** On each message, reads \`studentDirectoryData\` from \`localStorage\`
+2. **Augmentation:** Extracts top 5 students with name, branch, CGPA, and skills
+3. **Generation:** Injects retrieved data into the system prompt as context, then sends full conversation history to Groq
+
+**System Prompt Structure:**
+\`\`\`
+Role: EduPredict AI — career advisor & recruitment assistant
+Pillars: CGPA, Internships, Projects, Certifications
+Context: [Top 5 students from directory with profiles]
+Total students in database: [count]
+Rules: Markdown formatting, encouraging but realistic, concise (<200 words)
+\`\`\`
+
+### 7.3 Chatbot Capabilities
+
+- **Career Roadmap Generation** — Step-by-step guides based on target roles
+- **Student Profile Analysis** — Evaluates CGPA, internships, projects, certifications
+- **Job Readiness Assessment** — 4-pillar scoring
+- **Markdown Rendering** — Inline bold text and bullet point parsing
+- **Expand/Collapse** — 380px (compact) ↔ 800px (expanded) modes
+- **Conversation Memory** — Full message history sent in each API call
+
+### 7.4 UI Implementation
+
+- **Floating Button:** Fixed bottom-right, gradient background, rotation animation on toggle
+- **Chat Window:** Animated open/close with Framer Motion (scale, opacity, y-axis)
+- **Loading State:** \`Loader2\` spinning icon with "EduPredict is analyzing..." text
+- **Error Handling:** Toast notification + fallback error message in chat
+
+---
+
+## 8. Database / Data Layer
+
+> [!IMPORTANT]
+> This project does **not** use a traditional database (SQL/NoSQL). All persistence is handled through **flat files** (CSV, PKL) and **browser localStorage**.
+
+### 8.1 Data Storage Map
+
+| Data | Storage | Format | Persistence |
+|------|---------|--------|-------------|
+| **Training Dataset** | \`student-mat.csv\` | CSV (semicolon-delimited), 395 rows × 33 cols | File system (static) |
+| **Trained ML Model** | \`final_student_model.pkl\` | Joblib-serialized scikit-learn model (~3.3 MB) | File system (generated by training script) |
+| **Feature Scaler** | \`scaler.pkl\` | Joblib-serialized StandardScaler (~1 KB) | File system (generated by training script) |
+| **Prediction History** | \`localStorage['predictionHistory']\` | JSON array (max 20 entries) | Browser (per-device) |
+| **Student Directory** | \`localStorage['studentDirectoryData']\` | JSON array (350+ procedurally generated profiles) | Browser (per-device) |
+| **Bookmarked Students** | \`localStorage['bookmarkedStudents']\` | JSON array of student IDs | Browser (per-device) |
+| **Custom Profiles** | \`localStorage['customStudentProfiles']\` | JSON array of user-created profiles | Browser (per-device) |
+| **Groq API Key** | \`.env.local\` (\`VITE_GROQ_API_KEY\`) | Plain text environment variable | File system (not committed) |
+
+### 8.2 UCI Dataset Schema
+
+The \`student-mat.csv\` file contains **33 columns** across 395 student records:
+
+| Category | Columns |
+|----------|---------|
+| **School** | school (GP/MS) |
+| **Demographics** | sex, age, address (U/R), famsize, Pstatus |
+| **Family** | Medu, Fedu (education level 0-4), Mjob, Fjob, guardian |
+| **Academic** | reason, traveltime, studytime, failures, schoolsup, famsup, paid, activities, nursery, higher, internet, romantic |
+| **Lifestyle** | famrel, freetime, goout, Dalc (workday alcohol), Walc (weekend alcohol), health, absences |
+| **Grades** | G1 (period 1), G2 (period 2), **G3** (final grade — **target**) |
+
+### 8.3 Student Directory Data Model
+
+Each procedurally generated student profile (from \`StudentsDirectoryPage.jsx\`) contains:
+
+\`\`\`typescript
+interface Student {
+  id: string;             // Unique ID (e.g., "CSE-001")
+  name: string;           // Realistic Indian name
+  enrollment: string;     // Enrollment number
+  branch: string;         // CSE | IT | EXTC | Mechanical | Civil
+  cgpa: number;           // 6.0–10.0 (weighted distribution)
+  email: string;          // name@college.edu
+  skills: string[];       // Branch-specific skill set
+  certifications: string[]; // Branch-specific certifications
+  attendance: number;     // 60–100%
+  projects: number;       // 1–8
+  internships: number;    // 0–4
+  semester: number;       // 3–8
+}
+\`\`\`
+
+**Distribution:** 70 students per branch × 5 branches = 350 base profiles. CGPA distribution: 80% between 6.0–8.5, 20% between 8.5–10.0.
+
+---
+
+## 9. Application Workflow
+
+### 9.1 User Journey (End-to-End)
+
+\`\`\`mermaid
+flowchart TD
+    START(["🌐 User opens app"]) --> LOGIN["🔐 Login Page\\nEmail + password\\n(or social auth buttons)"]
+    LOGIN -->|"Clicks Login"| LOADING["🚀 Loading Screen\\n5 status messages\\nOrbital animation\\n4.2s progress bar"]
+    LOADING -->|"Auto-completes"| DASHBOARD["🏠 Dashboard\\n(Prediction Form visible)"]
+    
+    DASHBOARD --> FORM["📊 Fill Prediction Form\\nStep 1: Academic\\nStep 2: Habits"]
+    FORM -->|"Submit"| API_CALL["📡 POST /predict\\n→ Flask API on Render"]
+    API_CALL -->|"Response"| RESULT["📈 ResultDisplay\\nScore animation\\nMetric cards\\nTrajectory chart\\nFeature importance\\nAI advice"]
+    RESULT -->|"Saved"| HISTORY["💾 localStorage\\npredictionHistory\\n(max 20)"]
+    
+    DASHBOARD --> NAV{"🧭 Sidebar\\nNavigation"}
+    NAV --> ANALYTICS["📊 Analytics"]
+    NAV --> STUDENTS["👥 Students Directory\\n350+ profiles"]
+    NAV --> PRED_HIST["📋 Prediction History"]
+    NAV --> PERF["📈 Performance"]
+    NAV --> INSIGHTS["🧠 AI Insights"]
+    NAV --> SETTINGS["⚙️ Settings"]
+    NAV --> HELP["❓ Help"]
+    
+    STUDENTS --> MODAL["👤 Student Modal\\nProfile details\\nRadar chart\\nRecruiter tools"]
+    
+    style LOADING fill:#6366f1,color:white
+    style API_CALL fill:#0ea5e9,color:white
+    style RESULT fill:#10b981,color:white
+\`\`\`
+
+### 9.2 Developer Workflow
+
+#### Running Locally
+
+**Step 1 — Start Backend:**
+\`\`\`bash
+cd student-performance-api
+pip install flask flask-cors numpy joblib scikit-learn
+python app.py
+# → API running at http://localhost:5000
+\`\`\`
+
+**Step 2 — Start Frontend:**
+\`\`\`bash
+cd student-performance-frontend
+npm install
+npm run dev
+# → App running at http://localhost:5173
+\`\`\`
+
+**Step 3 — (Optional) AI Chatbot:**
+\`\`\`bash
+# Create .env.local in student-performance-frontend/
+echo "VITE_GROQ_API_KEY=your_groq_api_key_here" > .env.local
+# Get a free key at https://console.groq.com
+\`\`\`
+
+**Step 4 — (Optional) Retrain Model:**
+\`\`\`bash
+python student_performance_tuned_model.py
+# → Outputs: final_student_model.pkl + scaler.pkl
+# Copy to student-performance-api/ directory
+\`\`\`
+
+### 9.3 ML Training Workflow
+
+\`\`\`mermaid
+flowchart LR
+    A["📄 student-mat.csv"] --> B["🔧 Feature Engineering\\n7 features extracted"]
+    B --> C["🏷️ Target Encoding\\nG3 → {0,1,2}"]
+    C --> D["✂️ 80/20 Stratified Split"]
+    D --> E["📏 StandardScaler\\nfit on train"]
+    E --> F["🌲 Random Forest\\nGridSearchCV\\n5-fold CV"]
+    E --> G["⚡ XGBoost\\nGridSearchCV\\n5-fold CV"]
+    F --> H["📊 Compare Models\\nF1 weighted"]
+    G --> H
+    H --> I["🏆 Save Champion\\nfinal_student_model.pkl\\nscaler.pkl"]
+\`\`\`
+
+---
+
+## 10. File-Level Implementation Breakdown
+
+### 10.1 Root Directory
+
+| File | Size | Purpose |
+|------|------|---------|
+| [student-mat.csv](file:///d:/anand/student%20performance/student-mat.csv) | 57 KB | UCI dataset (395 records, 33 columns, semicolon-delimited) |
+| [student_performance_model.py](file:///d:/anand/student%20performance/student_performance_model.py) | 3.2 KB | Base training script: RF(300,12) + XGB(300,0.05,6), direct fit, 5-fold CV |
+| [student_performance_tuned_model.py](file:///d:/anand/student%20performance/student_performance_tuned_model.py) | 3.5 KB | Tuned script: GridSearchCV for both RF and XGB, saves champion model |
+| [architecture.md](file:///d:/anand/student%20performance/architecture.md) | 0.7 KB | Mermaid architecture + data flow diagrams |
+| [EduPredict_Project_Walkthrough.html](file:///d:/anand/student%20performance/EduPredict_Project_Walkthrough.html) | 35 KB | Styled HTML project walkthrough document |
+
+### 10.2 Backend API (\`student-performance-api/\`)
+
+| File | Size | Purpose |
+|------|------|---------|
+| [app.py](file:///d:/anand/student%20performance/student-performance-api/app.py) | 2.5 KB | Flask API: loads model+scaler at startup, \`/\` health check, \`/predict\` endpoint |
+| \`final_student_model.pkl\` | 3.3 MB | Serialized champion ML model (Joblib) |
+| \`scaler.pkl\` | 1.1 KB | Serialized StandardScaler (Joblib) |
+| \`requirements.txt\` | 0 KB | (Empty — dependencies installed manually) |
+
+### 10.3 Frontend (\`student-performance-frontend/\`)
+
+| File | Size | Purpose |
+|------|------|---------|
+| [package.json](file:///d:/anand/student%20performance/student-performance-frontend/package.json) | 1 KB | 11 dependencies + 8 devDependencies |
+| [src/App.jsx](file:///d:/anand/student%20performance/student-performance-frontend/src/App.jsx) | 15 KB | Root component: auth gate, routing, header, sidebar, layout, chatbot |
+| [src/index.css](file:///d:/anand/student%20performance/student-performance-frontend/src/index.css) | 8.2 KB | Global styles + TailwindCSS v4 directives |
+| [src/main.jsx](file:///d:/anand/student%20performance/student-performance-frontend/src/main.jsx) | 0.2 KB | React DOM entry point (\`createRoot\`) |
+
+---
+
+## 11. Deployment & Infrastructure
+
+| Component | Platform | URL |
+|-----------|----------|-----|
+| **Backend API** | Render (Web Service) | \`https://student-performance-ve59.onrender.com\` |
+| **Frontend** | Local dev server / deployable to Vercel, Netlify, etc. | \`http://localhost:5173\` |
+| **AI Chatbot** | Groq Cloud | \`https://api.groq.com/openai/v1/chat/completions\` |
+
+**API URL in Frontend Code:**
+\`\`\`javascript
+// App.jsx line 89
+const response = await fetch('https://student-performance-ve59.onrender.com/predict', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(formData)
+})
+\`\`\`
+
+> [!NOTE]
+> The API is hosted on Render's free tier. Cold starts may take 30–60 seconds if the service has been idle.
+
+---
+
+## 12. Project Statistics
+
+### 12.1 Codebase Size
+
+| Metric | Count |
+|--------|-------|
+| **Total Files (source)** | ~35 |
+| **React Components** | 29 (14 standalone + 7 UI primitives + 8 pages) |
+| **Python Scripts** | 3 (2 training + 1 API) |
+| **Lines of Code (Frontend)** | ~3,500+ |
+| **Lines of Code (Backend)** | ~96 |
+| **Lines of Code (ML Scripts)** | ~282 |
+| **Largest Component** | \`StudentsDirectoryPage.jsx\` (28 KB) |
+| **Largest Feature Component** | \`ResultDisplay.jsx\` (24 KB) |
+
+### 12.2 Technology Summary
+
+| Category | Technologies |
+|----------|-------------|
+| **Languages** | Python 3, JavaScript (ES2023+), JSX, CSS |
+| **Frontend** | React 19, Vite 7.3, TailwindCSS 4, Framer Motion 12, Chart.js 4.5, Lucide |
+| **Backend** | Flask, Flask-CORS, NumPy, Joblib |
+| **ML** | scikit-learn (RandomForest, StandardScaler, GridSearchCV), XGBoost |
+| **AI/LLM** | Groq API, LLaMA 3.3 70B, RAG |
+| **Data** | CSV, Joblib PKL, Browser localStorage |
+| **Deployment** | Render (API), Vite dev server (Frontend) |
+
+### 12.3 Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **No traditional database** | 395-record dataset fits in memory; prediction history is user-local; student directory is procedurally generated |
+| **localStorage for persistence** | Zero infrastructure cost; data stays on user's device; sufficient for demo/academic purposes |
+| **Flask over Django/FastAPI** | Minimal API surface (2 routes); Flask's simplicity matches the use case |
+| **Client-side routing (no react-router)** | Simple \`switch\` statement with \`activePage\` state; 9 pages don't warrant a routing library |
+| **Groq over OpenAI** | Free tier with high-speed inference; LLaMA 3.3 70B is comparable quality for advisory tasks |
+| **RAG via localStorage** | Avoids vector DB complexity; student directory is small enough to inject directly into prompts |
+| **GridSearchCV for tuning** | Exhaustive search over defined parameter grids; 5-fold CV with \`f1_weighted\` scoring ensures robust model selection |
+| **Both RF and XGBoost** | Ensemble diversity; champion model selected automatically based on F1 score |
+
+---
+
+> **Report generated:** March 2026  
+> **Project:** EduPredict — Student Performance Prediction System  
+> **Stack:** React + Vite + TailwindCSS | Flask + Python | scikit-learn + XGBoost | Groq + LLaMA 3.3
+`;
+    document.getElementById('content').innerHTML = marked.parse(markdownText);
+  </script>
+</body>
+</html>
