@@ -247,7 +247,7 @@ function App() {
                 </button>
 
                 {showNotifications && (
-                  <div className={`absolute right-0 mt-2 w-80 rounded-xl border shadow-2xl z-50 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
+                  <div className={`absolute right-0 mt-2 w-80 rounded-xl border shadow-2xl z-50 backdrop-blur-xl ${isDark ? 'bg-slate-900/90 border-slate-700/50' : 'bg-white/90 border-slate-200/50'}`}>
                     <div className={`flex items-center justify-between px-4 py-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                       <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Notifications</span>
                       <button onClick={() => setShowNotifications(false)}><X className="w-4 h-4 text-slate-400" /></button>
@@ -291,7 +291,7 @@ function App() {
                 </button>
 
                 {showUserMenu && (
-                  <div className={`absolute right-0 mt-2 w-56 rounded-xl border shadow-2xl z-50 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
+                  <div className={`absolute right-0 mt-2 w-56 rounded-xl border shadow-2xl z-50 backdrop-blur-xl ${isDark ? 'bg-slate-900/90 border-slate-700/50' : 'bg-white/90 border-slate-200/50'}`}>
                     <div className={`px-4 py-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                       <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Signed in as</p>
                       <p className={`text-xs mt-0.5 truncate ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{userEmail}</p>

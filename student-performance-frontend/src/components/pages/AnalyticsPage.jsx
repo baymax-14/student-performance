@@ -1,4 +1,18 @@
 import { BarChart3, TrendingUp, Users, Target } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemAnim = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 const AnalyticsPage = ({ history }) => {
   const totalPredictions = history.length;
@@ -22,19 +36,29 @@ const AnalyticsPage = ({ history }) => {
       <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Analytics</h2>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Overview of prediction statistics and trends.</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+      >
         {stats.map(stat => (
-          <div key={stat.label} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+          <motion.div variants={itemAnim} key={stat.label} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.label}</span>
               <stat.icon className={`w-4 h-4 text-${stat.color}-500 dark:text-${stat.color}-400`} />
             </div>
             <p className="text-3xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm"
+      >
         <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-5">Performance Distribution</h3>
         {totalPredictions === 0 ? (
           <p className="text-slate-500 text-sm">No predictions yet. Run some predictions from the Dashboard to see analytics.</p>
@@ -58,7 +82,7 @@ const AnalyticsPage = ({ history }) => {
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };

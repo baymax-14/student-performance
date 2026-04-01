@@ -26,9 +26,9 @@ const Sidebar = ({ open, setOpen, selected, setSelected }) => {
 
   return (
     <nav
-      className={`sticky top-0 h-screen shrink-0 border-r transition-all duration-300 ease-in-out ${
+      className={`sticky top-0 z-20 h-screen shrink-0 border-r transition-all duration-300 ease-in-out backdrop-blur-xl ${
         open ? 'w-64' : 'w-16'
-      } border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-sm`}
+      } border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-900/80 p-2 shadow-sm`}
     >
       <TitleSection open={open} />
 

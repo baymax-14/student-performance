@@ -53,6 +53,10 @@
   --accent-hover: #0284c7; /* sky-600 */
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-color);
