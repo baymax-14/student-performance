@@ -35,10 +35,17 @@ const PredictionHistory = ({ history }) => {
           >
             <AnimatePresence mode="popLayout">
             {history.map((item, index) => {
-              // Add color coding to result
               let resultColor = "#fca5a5"; // default poor
               if (item.prediction === 2) resultColor = "#6ee7b7"; // good
               if (item.prediction === 1) resultColor = "#fcd34d"; // avg
+
+              const studyTimeMap = {
+                1: "<2h",
+                2: "2-5h",
+                3: "5-10h",
+                4: ">10h"
+              };
+              const studyTimeDisplay = studyTimeMap[item.formData.studytime] || `${item.formData.studytime}h`;
 
               return (
                 <motion.tr 
@@ -52,7 +59,7 @@ const PredictionHistory = ({ history }) => {
                 >
                   <td className="px-4 py-3.5">{item.formData.attendance}%</td>
                   <td className="px-4 py-3.5">{item.formData.internal_avg}</td>
-                  <td className="px-4 py-3.5">{item.formData.studytime}h</td>
+                  <td className="px-4 py-3.5">{studyTimeDisplay}</td>
                   <td className="px-4 py-3.5 font-bold tracking-wide" style={{ color: resultColor }}>
                     {item.performance.split(" ")[0]}
                   </td>
