@@ -103,7 +103,8 @@ const generateStudents = () => {
     skills: ["React", "Node.js", "Python", "AWS", "Machine Learning", "System Design"],
     certifications: ["AWS Solutions Architect", "Meta Front-End Developer"],
     email: "keshav.raypure@edu.in",
-    location: "Amravati"
+    location: "Amravati",
+    linkedin: "https://www.linkedin.com/in/keshav-raypure-3a4a91290/"
   };
 
   // Shuffle the rest so all branches aren't clumped together
@@ -156,7 +157,18 @@ const StudentsDirectoryPage = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [visibleCount, setVisibleCount] = useState(24);
   
-  const [allStudents, setAllStudents] = useState(getInitialDirectory);
+  const [allStudents, setAllStudents] = useState(() => {
+    const initial = getInitialDirectory();
+    return initial.map(student => {
+      if (student.id === 999999 || student.name === "Keshav Raypure") {
+        return {
+          ...student,
+          linkedin: "https://www.linkedin.com/in/keshav-raypure-3a4a91290/"
+        };
+      }
+      return student;
+    });
+  });
   const [showAddModal, setShowAddModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 

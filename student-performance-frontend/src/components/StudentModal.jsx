@@ -241,7 +241,7 @@ const StudentModal = ({ student, onClose, onUpdateStudent }) => {
                     <Mail className="w-4 h-4 text-indigo-500" /> Contact &amp; Links
                   </h4>
                   <div className="space-y-3">
-                    <a href={`mailto:${student.email}`} className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
+                    <a href={`https://mail.google.com/mail/?view=cm&fs=1&to=${student.email}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
                       <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-md group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
                         <Mail className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                       </div>
@@ -262,10 +262,10 @@ const StudentModal = ({ student, onClose, onUpdateStudent }) => {
                     </a>
 
                     <div className="flex gap-3">
-                      <a href="#" className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium">
+                      <a href={student.linkedin || "#"} target={student.linkedin ? "_blank" : "_self"} rel={student.linkedin ? "noopener noreferrer" : ""} className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium">
                         <Linkedin className="w-4 h-4" /> LinkedIn
                       </a>
-                      <a href="#" className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium">
+                      <a href={student.github || "#"} target={student.github ? "_blank" : "_self"} rel={student.github ? "noopener noreferrer" : ""} className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium">
                         <Github className="w-4 h-4" /> GitHub
                       </a>
                     </div>
