@@ -104,7 +104,8 @@ const generateStudents = () => {
     certifications: ["AWS Solutions Architect", "Meta Front-End Developer"],
     email: "keshav.raypure@edu.in",
     location: "Amravati",
-    linkedin: "https://www.linkedin.com/in/keshav-raypure-3a4a91290/"
+    linkedin: "https://www.linkedin.com/in/keshav-raypure-3a4a91290/",
+    github: "https://github.com/baymax-14"
   };
 
   // Shuffle the rest so all branches aren't clumped together
@@ -164,7 +165,8 @@ const StudentsDirectoryPage = ({ userEmail }) => {
       if (student.id === 999999 || student.name === "Keshav Raypure") {
         return {
           ...student,
-          linkedin: "https://www.linkedin.com/in/keshav-raypure-3a4a91290/"
+          linkedin: "https://www.linkedin.com/in/keshav-raypure-3a4a91290/",
+          github: "https://github.com/baymax-14"
         };
       }
       return student;
