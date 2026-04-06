@@ -22,23 +22,29 @@ import toast, { Toaster } from 'react-hot-toast'
 function App() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
-  const [history, setHistory] = useState(() => {
-    const saved = localStorage.getItem('predictionHistory');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('predictionHistory', JSON.stringify(history));
-  }, [history]);
-  
-  const [isDark, setIsDark] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [activePage, setActivePage] = useState('Dashboard')
-
   // Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [showLoadingScreen, setShowLoadingScreen] = useState(false)
+
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    if (userEmail) {
+      const saved = localStorage.getItem(`predictionHistory_${userEmail}`);
+      setHistory(saved ? JSON.parse(saved) : []);
+    }
+  }, [userEmail]);
+
+  useEffect(() => {
+    if (userEmail) {
+      localStorage.setItem(`predictionHistory_${userEmail}`, JSON.stringify(history));
+    }
+  }, [history, userEmail]);
+  
+  const [isDark, setIsDark] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [activePage, setActivePage] = useState('Dashboard')
 
   // Header dropdown state
   const [showNotifications, setShowNotifications] = useState(false)
@@ -77,6 +83,8 @@ function App() {
     setShowUserMenu(false);
     setActivePage('Dashboard');
     setShowLoadingScreen(false);
+    setHistory([]);
+    setResult(null);
   };
 
   const handlePredict = async (formData) => {
