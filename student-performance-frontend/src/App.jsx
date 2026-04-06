@@ -145,7 +145,17 @@ function App() {
       case 'Analytics':
         return <AnalyticsPage history={history} />;
       case 'Prediction History':
-        return <StudentsPage history={history} />;
+        return (
+          <StudentsPage 
+            history={history} 
+            onDelete={(index) => setHistory(prev => prev.filter((_, i) => i !== index))}
+            onView={(index) => {
+              setResult(history[index]);
+              setActivePage('Dashboard');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        );
       case 'Students':
         return <StudentsDirectoryPage userEmail={userEmail} />;
       case 'Performance':
@@ -173,7 +183,14 @@ function App() {
               </div>
               {history.length > 0 && (
                 <div className="results-column">
-                  <PredictionHistory history={history} />
+                  <PredictionHistory 
+                    history={history} 
+                    onDelete={(index) => setHistory(prev => prev.filter((_, i) => i !== index))}
+                    onView={(index) => {
+                      setResult(history[index]);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  />
                 </div>
               )}
             </div>

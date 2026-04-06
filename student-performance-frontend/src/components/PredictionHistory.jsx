@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { Trash2 } from 'lucide-react';
 
-const PredictionHistory = ({ history }) => {
+const PredictionHistory = ({ history, onDelete, onView }) => {
   if (!history || history.length === 0) return null;
 
   return (
@@ -22,7 +23,8 @@ const PredictionHistory = ({ history }) => {
               <th className="px-4 py-3 font-medium rounded-tl-lg">Attendance</th>
               <th className="px-4 py-3 font-medium">Internal</th>
               <th className="px-4 py-3 font-medium">Study Time</th>
-              <th className="px-4 py-3 font-medium rounded-tr-lg">Result</th>
+              <th className="px-4 py-3 font-medium">Result</th>
+              <th className="px-4 py-3 font-medium rounded-tr-lg text-right">Actions</th>
             </tr>
           </thead>
           <motion.tbody
@@ -55,13 +57,26 @@ const PredictionHistory = ({ history }) => {
                   animate="show"
                   exit={{ opacity: 0, scale: 0.95 }}
                   key={index} 
-                  className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors last:border-0"
+                  onClick={() => onView && onView(index)}
+                  className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors last:border-0 cursor-pointer group"
                 >
                   <td className="px-4 py-3.5">{item.formData.attendance}%</td>
                   <td className="px-4 py-3.5">{item.formData.internal_avg}</td>
                   <td className="px-4 py-3.5">{studyTimeDisplay}</td>
                   <td className="px-4 py-3.5 font-bold tracking-wide" style={{ color: resultColor }}>
                     {item.performance.split(" ")[0]}
+                  </td>
+                  <td className="px-4 py-3.5 text-right">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onDelete) onDelete(index);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                      title="Delete prediction"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </td>
                 </motion.tr>
               );

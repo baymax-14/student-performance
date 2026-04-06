@@ -1,11 +1,12 @@
-import { Search } from 'lucide-react';
+import { Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-const StudentsPage = ({ history }) => {
+const StudentsPage = ({ history, onDelete, onView }) => {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('latest');
 
   const students = history.map((item, idx) => ({
+    originalIndex: idx,
     id: history.length - idx,
     attendance: item.formData.attendance,
     internal: item.formData.internal_avg,
@@ -77,11 +78,16 @@ const StudentsPage = ({ history }) => {
                 <th className="px-5 py-3.5 font-semibold">Backlogs</th>
                 <th className="px-5 py-3.5 font-semibold">Prediction</th>
                 <th className="px-5 py-3.5 font-semibold">Confidence</th>
+                <th className="px-5 py-3.5 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(s => (
-                <tr key={s.id} className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                <tr 
+                  key={s.id} 
+                  onClick={() => onView && onView(s.originalIndex)}
+                  className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer group"
+                >
                   <td className="px-5 py-3.5 text-slate-400 dark:text-slate-500 font-mono text-xs">{s.id}</td>
                   <td className="px-5 py-3.5 text-slate-700 dark:text-slate-200">{s.attendance}%</td>
                   <td className="px-5 py-3.5 text-slate-700 dark:text-slate-200">{s.internal}</td>
@@ -89,6 +95,18 @@ const StudentsPage = ({ history }) => {
                   <td className="px-5 py-3.5 text-slate-700 dark:text-slate-200">{s.backlogs}</td>
                   <td className={`px-5 py-3.5 font-bold ${predColor(s.prediction)}`}>{s.performance.split(' ')[0]}</td>
                   <td className="px-5 py-3.5 text-slate-700 dark:text-slate-300 font-semibold">{s.confidence}%</td>
+                  <td className="px-5 py-3.5 text-right">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onDelete) onDelete(s.originalIndex);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                      title="Delete entry"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
