@@ -243,7 +243,7 @@ const StudentsDirectoryPage = ({ userEmail }) => {
                 className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/10 dark:bg-black/20 border border-white/20 text-white placeholder-sky-200 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm transition-all"
               />
             </div>
-            {userEmail !== "recruiter@gmail.com" && userEmail !== "keshav@gmail.com" && (
+            {!isRecruiterContext && (
               <button 
                 onClick={() => setShowAddModal(true)}
                 className="flex items-center justify-center gap-2 bg-white text-sky-600 hover:bg-sky-50 px-5 py-3 rounded-xl font-bold shadow-lg transition-all"
