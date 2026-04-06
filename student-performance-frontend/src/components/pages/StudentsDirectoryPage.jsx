@@ -150,12 +150,13 @@ const getInitialDirectory = () => {
   return combined;
 };
 
-const StudentsDirectoryPage = () => {
+const StudentsDirectoryPage = ({ userEmail }) => {
   const [activeBranch, setActiveBranch] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [visibleCount, setVisibleCount] = useState(24);
+  const isRecruiterContext = userEmail === "recruiter@gmail.com";
   
   const [allStudents, setAllStudents] = useState(() => {
     const initial = getInitialDirectory();
@@ -240,12 +241,14 @@ const StudentsDirectoryPage = () => {
                 className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/10 dark:bg-black/20 border border-white/20 text-white placeholder-sky-200 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm transition-all"
               />
             </div>
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center justify-center gap-2 bg-white text-sky-600 hover:bg-sky-50 px-5 py-3 rounded-xl font-bold shadow-lg transition-all"
-            >
-              <Plus className="w-5 h-5" /> Add Profile
-            </button>
+            {userEmail !== "recruiter@gmail.com" && userEmail !== "keshav@gmail.com" && (
+              <button 
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center justify-center gap-2 bg-white text-sky-600 hover:bg-sky-50 px-5 py-3 rounded-xl font-bold shadow-lg transition-all"
+              >
+                <Plus className="w-5 h-5" /> Add Profile
+              </button>
+            )}
           </div>
         </div>
 
@@ -288,17 +291,19 @@ const StudentsDirectoryPage = () => {
             {branch} <span className="ml-1 opacity-60 text-xs">({allStudents.filter(s => s.branch === branch).length})</span>
           </button>
         ))}
-          <button
-            onClick={() => { setActiveBranch("Bookmarked"); setVisibleCount(24); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
-              activeBranch === "Bookmarked" 
-                ? "bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 shadow-sm border border-amber-200 dark:border-amber-800" 
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-            }`}
-          >
-            <Star className={`w-3.5 h-3.5 ${activeBranch === "Bookmarked" ? 'fill-amber-500 text-amber-500' : ''}`} />
-            Bookmarked <span className="ml-1 opacity-60 text-xs">({allStudents.filter(s => s.isBookmarked).length})</span>
-          </button>
+          {isRecruiterContext && (
+            <button
+              onClick={() => { setActiveBranch("Bookmarked"); setVisibleCount(24); }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                activeBranch === "Bookmarked" 
+                  ? "bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 shadow-sm border border-amber-200 dark:border-amber-800" 
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              <Star className={`w-3.5 h-3.5 ${activeBranch === "Bookmarked" ? 'fill-amber-500 text-amber-500' : ''}`} />
+              Bookmarked <span className="ml-1 opacity-60 text-xs">({allStudents.filter(s => s.isBookmarked).length})</span>
+            </button>
+          )}
         </div>
 
         {/* Sort Select */}
@@ -328,7 +333,11 @@ const StudentsDirectoryPage = () => {
               <p>No students found matching your search.</p>
             </div>
           ) : (
-            filteredStudents.slice(0, visibleCount).map(student => (
+            filteredStudents.slice(0, visibleCount).map(student => {
+              const isKeshavContext = userEmail === "keshav@gmail.com";
+              const canBookmark = isRecruiterContext;
+
+              return (
               <motion.div
                 layout
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -343,7 +352,8 @@ const StudentsDirectoryPage = () => {
                 className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg dark:hover:shadow-slate-900/50 hover:border-sky-300 dark:hover:border-sky-700 transition-all cursor-pointer flex flex-col"
               >
                 {/* Bookmark Toggle */}
-                <button
+                {canBookmark && (
+                  <button
                   onClick={(e) => {
                     e.stopPropagation();
                     const newStatus = !student.isBookmarked;
@@ -358,6 +368,7 @@ const StudentsDirectoryPage = () => {
                 >
                   <Star className={`w-4 h-4 transition-colors ${student.isBookmarked ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-600'}`} />
                 </button>
+                )}
 
                 <div className="flex justify-between items-start mb-4 pr-8">
                   <div>
@@ -394,7 +405,7 @@ const StudentsDirectoryPage = () => {
                   </div>
                 </div>
               </motion.div>
-            ))
+            )})
           )}
         </AnimatePresence>
         )}
@@ -418,6 +429,7 @@ const StudentsDirectoryPage = () => {
           student={selectedStudent}
           onClose={() => setSelectedStudent(null)}
           onUpdateStudent={handleUpdateStudent}
+          userEmail={userEmail}
         />
       )}
 

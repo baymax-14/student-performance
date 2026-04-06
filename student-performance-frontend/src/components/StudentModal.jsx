@@ -25,7 +25,11 @@ const getCgpaColor = (cgpa) => {
   return "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-500/10 border-slate-200 dark:border-slate-500/20";
 };
 
-const StudentModal = ({ student, onClose, onUpdateStudent }) => {
+const StudentModal = ({ student, onClose, onUpdateStudent, userEmail }) => {
+  const isKeshavContext = userEmail === "keshav@gmail.com";
+  const isRecruiterContext = userEmail === "recruiter@gmail.com";
+  const canEditCert = !isRecruiterContext && (!isKeshavContext || student.email === "keshav.raypure@edu.in");
+  const canBookmark = isRecruiterContext;
   const [isAddingCert, setIsAddingCert] = useState(false);
   const [newCertValue, setNewCertValue] = useState("");
   const [showPredictor, setShowPredictor] = useState(false);
@@ -98,18 +102,20 @@ const StudentModal = ({ student, onClose, onUpdateStudent }) => {
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                     {student.name}
-                    <button
-                      onClick={() => {
-                        const newStatus = !student.isBookmarked;
-                        onUpdateStudent({ ...student, isBookmarked: newStatus });
-                        if (newStatus) toast.success(`${student.name} bookmarked!`);
-                        else toast.error(`${student.name} removed from bookmarks.`);
-                      }}
-                      className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center justify-center"
-                      title={student.isBookmarked ? "Remove Bookmark" : "Bookmark"}
-                    >
-                      <Star className={`w-6 h-6 transition-all ${student.isBookmarked ? 'fill-amber-400 text-amber-400 drop-shadow-sm' : 'text-slate-300 dark:text-slate-600'}`} />
-                    </button>
+                    {canBookmark && (
+                      <button
+                        onClick={() => {
+                          const newStatus = !student.isBookmarked;
+                          onUpdateStudent({ ...student, isBookmarked: newStatus });
+                          if (newStatus) toast.success(`${student.name} bookmarked!`);
+                          else toast.error(`${student.name} removed from bookmarks.`);
+                        }}
+                        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center justify-center"
+                        title={student.isBookmarked ? "Remove Bookmark" : "Bookmark"}
+                      >
+                        <Star className={`w-6 h-6 transition-all ${student.isBookmarked ? 'fill-amber-400 text-amber-400 drop-shadow-sm' : 'text-slate-300 dark:text-slate-600'}`} />
+                      </button>
+                    )}
                   </h2>
                   <p className="text-sm font-mono text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">
                     {student.enrollment} • {student.branch}
@@ -164,7 +170,7 @@ const StudentModal = ({ student, onClose, onUpdateStudent }) => {
                       <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                         <Award className="w-4 h-4 text-amber-500" /> Certifications
                       </h4>
-                      {!isAddingCert && (
+                      {!isAddingCert && canEditCert && (
                         <button
                           onClick={() => setIsAddingCert(true)}
                           className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 px-2 py-1 rounded-md hover:bg-sky-100 dark:hover:bg-sky-500/20 transition-colors"

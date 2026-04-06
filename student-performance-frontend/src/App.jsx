@@ -147,7 +147,7 @@ function App() {
       case 'Prediction History':
         return <StudentsPage history={history} />;
       case 'Students':
-        return <StudentsDirectoryPage />;
+        return <StudentsDirectoryPage userEmail={userEmail} />;
       case 'Performance':
         return <PerformancePage />;
       case 'Settings':

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, Github, Sun, Moon } from "lucide-react";
+import toast from 'react-hot-toast';
 
 // Utility function
 function cn(...classes) {
@@ -44,18 +45,25 @@ const LoginPage = ({ onLogin, isDark, setIsDark }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
-      onLogin({ email });
-    }, 1500);
+      setIsLoading(false);
+      if (email === "keshav@gmail.com" && password === "keshav123") {
+        onLogin({ email });
+      } else if (email === "recruiter@gmail.com" && password === "recruiter123") {
+        onLogin({ email });
+      } else if (email === "demo@example.com") {
+        onLogin({ email });
+      } else {
+        toast.error("Invalid email or password");
+      }
+    }, 1000);
   };
 
   const handleDemoLogin = (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      onLogin({ email: "demo@example.com" });
-    }, 1000);
+    setEmail("recruiter@gmail.com");
+    setPassword("recruiter123");
+    toast.success("Demo credentials filled!");
   };
 
   return (
